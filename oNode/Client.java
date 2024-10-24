@@ -1,10 +1,11 @@
-public class ClientHandler implements Runnable {
-    private DatagramSocket socket;
-    private DatagramPacket packet;
+import java.net.DatagramPacket;
+import java.net.Socket;
 
-    public ClientHandler(DatagramSocket socket, DatagramPacket packet) {
+public class Client implements Runnable {
+    private Socket socket;
+
+    public Client(Socket socket) {
         this.socket = socket;
-        this.packet = packet;
     }
 
     @Override
@@ -16,11 +17,12 @@ public class ClientHandler implements Runnable {
             String responseMessage = "Mensagem recebida: " + message;
             byte[] responseData = responseMessage.getBytes();
             DatagramPacket responsePacket = new DatagramPacket(
-                responseData,
-                responseData.length,
-                packet.getAddress(),
-                packet.getPort()
+                    responseData,
+                    responseData.length,
+                    packet.getAddress(),
+                    packet.getPort()
             );
+
             socket.send(responsePacket);
 
         } catch (Exception e) {

@@ -1,3 +1,5 @@
+import java.net.InetAddress;
+
 public class Route{
     private InetAddress origin;
     private InetAddress previous;
