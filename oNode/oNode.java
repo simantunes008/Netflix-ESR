@@ -1,49 +1,41 @@
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+package oNode;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class oNode {
-
-    private static DatagramSocket forOverlay_s;
-    private static InetAddress ipServer;
-
-
-    public static void overlay_infos(){
-        
-        try{
-            String mensagem = "HELLO, server! Can you please send me my neighbours?";
-
-            byte[] buffer = mensagem.getBytes();
-
-            // Criar o pacote
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length, ipServer, 2020);
-
-            forOverlay_s.send(packet);
-        } catch (Exception e) {
-            e.printStackTrace();
+    public static void main(String[] args) throws IOException {
+        if (args[0].equals("-b")) {
+            new Thread(new Bootstrapper(args[1])).start();
         }
-        
-    }
 
+        if (args[0].equals("-sc")) {
+            // Inicia o servidor
+            new Thread(new Server()).start();
 
-    public static void main(String[] args) {
-        if (args.length == 3 && args[1].equals("-b")) {
-            String name = args[2];
-            Server s = new Server(Server.ServerMode.BOOTSTRAPPER, name);
-            s.start();
-            overlay_infos();
+            // Liga-se ao bootstrapper para pedir os vizinhos
+            Socket socket = new Socket(args[1], 8080);
 
-        } else if (args.length == 3 && args[2].equals("-c")) {
-            //Client client = new Client();
+            DataInputStream in = new DataInputStream(socket.getInputStream());
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
-        } else if (args.length == 3 && args[2].equals("-s")) {
-            Server s = new Server(Server.ServerMode.SIMPLE, null); 
-            s.start();
+            out.writeUTF("JOIN");
+
+            List<String> neighbours = new ArrayList<>();
+            int size = in.readInt();
+
+            for (int i = 0; i < size; i++) {
+                String s = in.readUTF();
+                System.out.println(s);
+                neighbours.add(s);
+            }
+
+            out.writeUTF("CLOSE");
+            socket.close();
         }
     }
-
-
-    
-
-
 }
