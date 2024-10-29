@@ -19,7 +19,7 @@ public class oNode {
 
         } else if (args.length == 2 && args[0].equals("-sc")) {
             // Inicia o servidor para enviar pacotes
-            new Thread(new Server()).start();
+            new Thread(new Server(routs)).start();
 
             // Liga-se ao bootstrapper para pedir os vizinhos
             Socket socket = new Socket(args[1], 8080);
@@ -32,9 +32,7 @@ public class oNode {
             int size = in.readInt();
 
             for (int i = 0; i < size; i++) {
-                String s = in.readUTF();
-                System.out.println(s);
-                neighbours.add(s);
+                neighbours.add(in.readUTF());
             }
 
             out.writeUTF("CLOSE");

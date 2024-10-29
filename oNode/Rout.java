@@ -2,16 +2,19 @@ package oNode;
 
 public class Rout {
     String previousIP;
-    int jumps;
+    int nJumps;
     long delay;
 
     public Rout(String previousIP, int jumps, long delay) {
         this.previousIP = previousIP;
-        this.jumps = jumps;
+        this.nJumps = jumps;
         this.delay = delay;
     }
 
     public String toString() {
-        return previousIP + ":" + jumps + ":" + delay;
+        return "Nodo anterior: " + previousIP + "\n" +
+                "Nº de saltos: " + nJumps + "\n" +
+                "Delay: " + delay + "ms\n" +
+                "----------------------------------";
     }
 }

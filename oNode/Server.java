@@ -5,6 +5,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Server implements Runnable {
+    private Routs routs;
+
+    public Server(Routs routs) {
+        this.routs = routs;
+    }
 
     @Override
     public void run() {
@@ -14,7 +19,7 @@ public class Server implements Runnable {
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                new Thread(new ServerTHD(clientSocket)).start();
+                new Thread(new ServerTHD(clientSocket, routs)).start();
             }
 
         } catch (IOException e) {

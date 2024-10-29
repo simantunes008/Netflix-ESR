@@ -1,6 +1,5 @@
 package oNode;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
 import java.net.Socket;
@@ -20,14 +19,10 @@ public class Monitor implements Runnable {
                 for (String neighbor : neighbors) {
                     try {
                         Socket socket = new Socket(neighbor, 8090);
-
-                        DataInputStream in = new DataInputStream(socket.getInputStream());
                         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-
                         out.writeUTF("HELLO");
-                        String response = in.readUTF();
-                        System.out.println(response);
-
+                        out.writeInt(0);
+                        out.writeLong(System.currentTimeMillis());
                         socket.close();
                     } catch (Exception e) {
                         System.out.println("Vizinho " + neighbor + " não está conectado");
