@@ -9,12 +9,16 @@ import java.util.List;
 
 public class oNode {
     public static void main(String[] args) throws IOException {
-        if (args[0].equals("-b")) {
-            new Thread(new Bootstrapper(args[1])).start();
-        }
 
-        if (args[0].equals("-sc")) {
-            // Inicia o servidor
+        List<String> neighbours = new ArrayList<>();
+        Routs routs = new Routs();
+
+        if (args.length == 2 && args[0].equals("-b")) {
+            // Node em modo Bootstrapper
+            new Thread(new Bootstrapper(args[1])).start();
+
+        } else if (args.length == 2 && args[0].equals("-sc")) {
+            // Inicia o servidor para enviar pacotes
             new Thread(new Server()).start();
 
             // Liga-se ao bootstrapper para pedir os vizinhos
@@ -25,7 +29,6 @@ public class oNode {
 
             out.writeUTF("JOIN");
 
-            List<String> neighbours = new ArrayList<>();
             int size = in.readInt();
 
             for (int i = 0; i < size; i++) {
@@ -36,6 +39,11 @@ public class oNode {
 
             out.writeUTF("CLOSE");
             socket.close();
+
+            new Thread(new Monitor(neighbours)).start();
+
+        } else {
+            System.out.println("Opções de utilização inválidas");
         }
     }
 }

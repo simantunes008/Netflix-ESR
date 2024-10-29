@@ -26,13 +26,10 @@ public class BootstrapperTHD implements Runnable {
 
             if (message.equals("JOIN")) {
                 out.writeInt(neighbors.size());
-
                 for (String neighbor : neighbors) {
                     out.writeUTF(neighbor);
                 }
-            }
-
-            if (message.equals("CLOSE")) {
+            } else if (message.equals("CLOSE")) {
                 socket.close();
             }
 

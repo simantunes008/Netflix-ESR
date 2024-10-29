@@ -1,3 +1,9 @@
+/**
+ * Servidor responsável pelo papel de Bootstrapper
+ * Cada Node liga-se a ele para receber a sua lista de Nodes vizinhos
+ * Essa lista é conseguida por um ficheiro de configuração
+ * */
+
 package oNode;
 
 import java.io.BufferedReader;
@@ -6,36 +12,29 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Bootstrapper implements Runnable {
-    private final String configure;
+    private final String configFile;
 
     public Bootstrapper(String configure) {
-        this.configure = configure;
+        this.configFile = configure;
     }
 
     @Override
     public void run() {
         Map<String, List<String>> overlay = new HashMap<>();
-        File configFile = new File(configure);
+        File configFile = new File(this.configFile);
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
-            int numNodes = Integer.parseInt(reader.readLine().trim());
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(configFile));
+            int nodes = Integer.parseInt(reader.readLine().trim());
 
-            for (int i = 0; i < numNodes; i++) {
+            for (int i = 0; i < nodes; i++) {
                 String line = reader.readLine().trim();
                 String[] parts = line.split(" ");
-                String nodeIP = parts[0].substring(1); // Remove a barra inicial '/'
-
-                List<String> neighbors = new ArrayList<>();
-                for (int j = 1; j < parts.length; j++) {
-                    neighbors.add(parts[j]);
-                }
-
+                String nodeIP = parts[0].substring(1);
+                List<String> neighbors = new ArrayList<>(Arrays.asList(parts).subList(1, parts.length));
                 overlay.put(nodeIP, neighbors);
             }
 
@@ -45,8 +44,8 @@ public class Bootstrapper implements Runnable {
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                String ip = clientSocket.getInetAddress().getHostAddress();
-                new Thread(new BootstrapperTHD(clientSocket, overlay.get(ip))).start();
+                String clientIP = clientSocket.getInetAddress().getHostAddress();
+                new Thread(new BootstrapperTHD(clientSocket, overlay.get(clientIP))).start();
             }
 
         } catch (IOException e) {
