@@ -10,9 +10,9 @@ node n1 {
 	!
     }
     canvas c1
-    iconcoords {922.0 368.0}
-    labelcoords {922.0 400.0}
-    interface-peer {eth0 n2}
+    iconcoords {921.0 327.0}
+    labelcoords {921.0 359.0}
+    interface-peer {eth0 n9}
 }
 
 node n2 {
@@ -20,6 +20,10 @@ node n2 {
     model router
     network-config {
 	hostname Router
+	!
+	interface eth1
+	 ip address 10.0.1.1/24
+	 ipv6 address 2001:1::1/64
 	!
 	interface eth2
 	 ip address 10.0.4.1/24
@@ -29,17 +33,13 @@ node n2 {
 	 ip address 10.0.3.2/24
 	 ipv6 address 2001:3::2/64
 	!
-	interface eth1
-	 ip address 10.0.1.1/24
-	 ipv6 address 2001:1::1/64
-	!
     }
     canvas c1
-    iconcoords {697.0 369.0}
-    labelcoords {697.0 401.0}
-    interface-peer {eth1 n1}
+    iconcoords {651.0 320.0}
+    labelcoords {651.0 352.0}
     interface-peer {eth0 n5}
     interface-peer {eth2 n6}
+    interface-peer {eth1 n9}
 }
 
 node n3 {
@@ -54,8 +54,8 @@ node n3 {
 	!
     }
     canvas c1
-    iconcoords {55.0 376.0}
-    labelcoords {55.0 408.0}
+    iconcoords {58.0 402.0}
+    labelcoords {58.0 434.0}
     interface-peer {eth0 n4}
 }
 
@@ -66,8 +66,8 @@ node n4 {
 	!
     }
     canvas c1
-    iconcoords {215.0 376.0}
-    labelcoords {215.0 400.0}
+    iconcoords {206.0 348.0}
+    labelcoords {206.0 372.0}
     interface-peer {e0 n3}
     interface-peer {e1 n7}
 }
@@ -88,8 +88,8 @@ node n5 {
 	!
     }
     canvas c1
-    iconcoords {507.0 262.0}
-    labelcoords {507.0 294.0}
+    iconcoords {459.0 255.0}
+    labelcoords {459.0 287.0}
     interface-peer {eth0 n7}
     interface-peer {eth1 n2}
 }
@@ -110,8 +110,8 @@ node n6 {
 	!
     }
     canvas c1
-    iconcoords {506.0 497.0}
-    labelcoords {506.0 529.0}
+    iconcoords {545.0 497.0}
+    labelcoords {545.0 529.0}
     interface-peer {eth0 n2}
     interface-peer {eth1 n7}
 }
@@ -136,20 +136,46 @@ node n7 {
 	!
     }
     canvas c1
-    iconcoords {339.0 377.0}
-    labelcoords {339.0 409.0}
+    iconcoords {331.0 400.0}
+    labelcoords {331.0 432.0}
     interface-peer {eth0 n4}
     interface-peer {eth1 n5}
     interface-peer {eth2 n6}
 }
 
-link l1 {
-    nodes {n3 n4}
-    bandwidth 0
+node n8 {
+    type router
+    model host
+    network-config {
+	hostname Bootstrapper
+	!
+	interface eth0
+	 ip address 10.0.1.11/24
+	 ipv6 address 2001:1::11/64
+	!
+    }
+    canvas c1
+    iconcoords {902.0 467.0}
+    labelcoords {902.0 499.0}
+    interface-peer {eth0 n9}
 }
 
-link l3 {
-    nodes {n2 n1}
+node n9 {
+    type lanswitch
+    network-config {
+	hostname n9
+	!
+    }
+    canvas c1
+    iconcoords {801.0 362.0}
+    labelcoords {801.0 386.0}
+    interface-peer {e0 n2}
+    interface-peer {e1 n1}
+    interface-peer {e2 n8}
+}
+
+link l1 {
+    nodes {n3 n4}
     bandwidth 0
 }
 
@@ -175,6 +201,21 @@ link l6 {
 
 link l7 {
     nodes {n6 n7}
+    bandwidth 0
+}
+
+link l3 {
+    nodes {n2 n9}
+    bandwidth 0
+}
+
+link l8 {
+    nodes {n9 n1}
+    bandwidth 0
+}
+
+link l9 {
+    nodes {n9 n8}
     bandwidth 0
 }
 

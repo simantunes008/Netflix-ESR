@@ -21,8 +21,10 @@ public class Monitor implements Runnable {
                         Socket socket = new Socket(neighbor, 8090);
                         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
                         out.writeUTF("HELLO");
+                        out.writeUTF(socket.getLocalAddress().getHostAddress());
                         out.writeInt(0);
                         out.writeLong(System.currentTimeMillis());
+                        out.writeLong(0);
                         socket.close();
                     } catch (Exception e) {
                         System.out.println("Vizinho " + neighbor + " não está conectado");
