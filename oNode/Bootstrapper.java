@@ -33,7 +33,7 @@ public class Bootstrapper implements Runnable {
             for (int i = 0; i < nodes; i++) {
                 String line = reader.readLine().trim();
                 String[] parts = line.split(" ");
-                String nodeIP = parts[0].substring(1);
+                String nodeIP = parts[0];
                 List<String> neighbors = new ArrayList<>(Arrays.asList(parts).subList(1, parts.length));
                 overlay.put(nodeIP, neighbors);
             }
