@@ -52,9 +52,9 @@ public class ServerTHD implements Runnable {
                 long delay = System.currentTimeMillis() - this.in.readLong() + this.in.readLong();
 
                 Rout rout = new Rout(previousNode, jumps, delay);
-                boolean massa = routs.insertRout(serverIP, rout);
+                boolean hasChanged = routs.insertRout(serverIP, rout);
 
-                if (massa) {
+                if (hasChanged) {
                     for (String neighborIP : temp) {
                         forward(neighborIP, serverIP, jumps, delay);
                     }

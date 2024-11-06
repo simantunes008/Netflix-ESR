@@ -612,6 +612,7 @@ link l10 {
 }
 
 link l11 {
+    delay 10000
     nodes {n5 n10}
     bandwidth 0
 }
@@ -622,11 +623,13 @@ link l12 {
 }
 
 link l13 {
+    delay 5000
     nodes {n8 n12}
     bandwidth 0
 }
 
 link l14 {
+    delay 20000
     nodes {n8 n14}
     bandwidth 0
 }
@@ -712,6 +715,7 @@ link l30 {
 }
 
 link l31 {
+    delay 10000
     nodes {n21 n22}
     bandwidth 0
 }

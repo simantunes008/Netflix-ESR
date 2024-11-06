@@ -30,6 +30,7 @@ public class Routs {
     }
 
     public boolean insertRout(String IP, Rout rout) {
+        // A rota é nova
         if (!this.routs.containsKey(IP)) {
             this.routs.put(IP, rout);
             return true;
@@ -42,8 +43,8 @@ public class Routs {
             this.routs.put(IP, rout);
             return true;
         }
-        // É importante atualizar para depois decidir qual usar
 
+        // A rota é diferente e mais rápida
         if (rout.delay < temp.delay) {
             this.routs.put(IP, rout);
             return true;
@@ -55,8 +56,7 @@ public class Routs {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Rout> entry : routs.entrySet()) {
-            sb.append("Servidor: ").append(entry.getKey()).append("\n").append(entry.getValue().toString())
-                    .append("\n");
+            sb.append("Servidor: ").append(entry.getKey()).append("\n").append(entry.getValue().toString()).append("\n");
         }
         return sb.toString();
     }

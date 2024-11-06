@@ -20,11 +20,17 @@ public class Monitor implements Runnable {
                     try {
                         Socket socket = new Socket(neighbor, 8090);
                         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
                         out.writeUTF("HELLO");
+                        // Servidor origem
                         out.writeUTF(socket.getLocalAddress().getHostAddress());
+                        // Número de saltos
                         out.writeInt(0);
+                        // Timestamp de quando a mensagem foi enviada
                         out.writeLong(System.currentTimeMillis());
+                        // Delay acumulado
                         out.writeLong(0);
+
                         socket.close();
                     } catch (Exception e) {
                         System.out.println("Vizinho " + neighbor + " não está conectado");
