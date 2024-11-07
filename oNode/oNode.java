@@ -17,12 +17,12 @@ public class oNode {
             // Node em modo Bootstrapper
             new Thread(new Bootstrapper(args[1])).start();
 
-        } else if (args.length == 3 && args[0].equals("-pop")) {
+        } else if (args.length == 2 && args[0].equals("-pop")) {
             // Inicia o servidor para enviar pacotes
             new Thread(new Server(neighbours, routs)).start();
 
             // Servidor UDP para receber pacotes dos clientes
-            new Thread(new ServerUDP(args[2])).start();
+            new Thread(new popWorker(routs)).start();
 
             // Liga-se ao bootstrapper para pedir os vizinhos
             Socket socket = new Socket(args[1], 8080);
@@ -43,7 +43,7 @@ public class oNode {
 
             // Executa o monitor da rede Overlay
             new Thread(new Monitor(neighbours)).start();
-            
+
         } else if (args.length == 3 && args[0].equals("-s")) {
             // Inicia o servidor para enviar pacotes
             new Thread(new Server(neighbours, routs)).start();
@@ -70,7 +70,7 @@ public class oNode {
 
             // Executa o monitor da rede Overlay
             new Thread(new Monitor(neighbours)).start();
-            
+
         } else if (args.length == 2 && args[0].equals("-sc")) {
             // Inicia o servidor para enviar pacotes
             new Thread(new Server(neighbours, routs)).start();

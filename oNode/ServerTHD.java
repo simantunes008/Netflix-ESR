@@ -60,9 +60,26 @@ public class ServerTHD implements Runnable {
                     }
                 }
 
-                System.out.print("\033[H\033[2J");
-                System.out.flush();
-                System.out.println(routs.toString());
+                // System.out.print("\033[H\033[2J");
+                // System.out.flush();
+                // System.out.println(routs.toString());
+            } else if (message.equals("FLOW")) {
+                String targetServer = in.readUTF();
+
+                if (targetServer.equals(this.socket.getLocalAddress().getHostAddress())) {
+                    System.out.println("CHEGUEI");
+                } else {
+                    Rout rout = routs.routs.get(targetServer);
+                    String nextIP = rout.previousIP;
+
+                    Socket socket = new Socket(nextIP, 8090);
+                    DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
+                    out.writeUTF("FLOW");
+                    out.writeUTF(targetServer);
+
+                    socket.close();
+                }
             }
 
             socket.close();

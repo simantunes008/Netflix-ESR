@@ -2,8 +2,6 @@ package oNode;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.Arrays;
-import java.util.List;
 
 public class oClient {
     private static final int TIMEOUT = 1000;
@@ -23,10 +21,11 @@ public class oClient {
             socket.receive(responsePacket);
 
             String response = new String(responsePacket.getData(), 0, responsePacket.getLength());
-            List<String> pointsOfPresence = Arrays.asList(response.split(","));
-            System.out.println("Pontos de presença: " + pointsOfPresence);
+            String[] pointsOfPresence = response.split(",");
 
-            System.out.print("\033[H\033[2J");
+            String bestServer = "";
+            long bestLatency = Long.MAX_VALUE;
+
             for (String pop : pointsOfPresence) {
                 InetAddress popAddress = InetAddress.getByName(pop);
                 long totalLatency = 0;
@@ -35,30 +34,39 @@ public class oClient {
                 for (int i = 0; i < PING_ATTEMPTS; i++) {
                     try {
                         long startTime = System.currentTimeMillis();
-                        
+
                         byte[] pingMessage = "PING".getBytes();
                         DatagramPacket pingPacket = new DatagramPacket(pingMessage, pingMessage.length, popAddress, 8070);
                         socket.send(pingPacket);
-                        
+
                         DatagramPacket responsePingPacket = new DatagramPacket(new byte[1024], 1024);
                         socket.receive(responsePingPacket);
-                        
+
                         totalLatency += System.currentTimeMillis() - startTime;
                         successfulPings++;
                     } catch (SocketTimeoutException e) {
                         System.out.println("Ping para " + pop + " #" + (i + 1) + " falhou (timeout)");
                     }
                 }
-                
+
                 if (successfulPings > 0) {
                     long averageLatency = totalLatency / successfulPings;
                     System.out.println("Ponto de presença: " + pop);
                     System.out.println("Delay médio: " + averageLatency + " ms");
                     System.out.println("----------------------------------");
+                    if (averageLatency < bestLatency) {
+                        bestLatency = averageLatency;
+                        bestServer = pop;
+                    }
+
                 } else {
                     System.out.println("Nenhuma resposta do PoP " + pop + " após " + PING_ATTEMPTS + " tentativas");
                 }
             }
+
+            byte[] pingMessage = args[0].getBytes();
+            DatagramPacket pingPacket = new DatagramPacket(pingMessage, pingMessage.length, InetAddress.getByName(bestServer), 8070);
+            socket.send(pingPacket);
 
             socket.close();
         }

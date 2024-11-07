@@ -1,32 +1,22 @@
 package oNode;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.*;
+import java.net.Socket;
 
-public class ServerUDP implements Runnable {
-    private String configFile;
+public class popWorker implements Runnable {
+    private Routs routs;
 
-    public ServerUDP(String configFile) {
-        this.configFile = configFile;
+    public popWorker(Routs routs) {
+        this.routs = routs;
     }
 
     @Override
     public void run() {
-        List<String> pointsOfPresence = new ArrayList<>();
-        File configFile = new File(this.configFile);
-
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(configFile));
-            String line = reader.readLine().trim();
-            String[] parts = line.split(" ");
-            Collections.addAll(pointsOfPresence, parts);
-
             DatagramSocket socket = new DatagramSocket(8070);
             System.out.println("Configuração carregada!");
             System.out.println("Servidor UDP à escuta na porta 8070");
@@ -40,15 +30,21 @@ public class ServerUDP implements Runnable {
                 int clientPort = packet.getPort();
 
                 String message = new String(packet.getData(), 0, packet.getLength()).trim();
-                if (message.equals("HELLO")) {
-                    String pointsOfPresenceList = String.join(",", pointsOfPresence);
-                    byte[] response = pointsOfPresenceList.getBytes();
-
+                if (message.equals("PING")) {
+                    byte[] response = "PONG".getBytes();
                     packet = new DatagramPacket(response, response.length, clientAddress, clientPort);
                     socket.send(packet);
+                } else {
+                    Rout rout = routs.routs.get(message);
+                    String nextIP = rout.previousIP;
 
-                } else if (message.equals("")) {
+                    Socket socket1 = new Socket(nextIP, 8090);
+                    DataOutputStream out = new DataOutputStream(socket1.getOutputStream());
 
+                    out.writeUTF("FLOW");
+                    out.writeUTF(message);
+
+                    socket1.close();
                 }
             }
 
