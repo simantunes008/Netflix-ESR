@@ -8,10 +8,12 @@ import java.util.List;
 public class Server implements Runnable {
     private List<String> neighbors;
     private Routs routs;
+    private Flows flows;
 
-    public Server(List<String> neighbors, Routs routs) {
+    public Server(List<String> neighbors, Routs routs, Flows flows) {
         this.routs = routs;
         this.neighbors = neighbors;
+        this.flows = flows;
     }
 
     @Override
@@ -22,7 +24,7 @@ public class Server implements Runnable {
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                new Thread(new ServerTHD(clientSocket, neighbors, routs)).start();
+                new Thread(new ServerTHD(clientSocket, neighbors, routs, flows)).start();
             }
 
         } catch (IOException e) {

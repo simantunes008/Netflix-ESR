@@ -13,16 +13,18 @@ public class ServerTHD implements Runnable {
     private final DataOutputStream out;
     private List<String> neighbors;
     private Routs routs;
+    private Flows flows;
 
-    ServerTHD(Socket socket, List<String> neighbors, Routs routs) throws IOException {
+    ServerTHD(Socket socket, List<String> neighbors, Routs routs, Flows flows) throws IOException {
         this.socket = socket;
         this.in = new DataInputStream(socket.getInputStream());
         this.out = new DataOutputStream(socket.getOutputStream());
         this.neighbors = neighbors;
         this.routs = routs;
+        this.flows = flows;
     }
 
-    public void forward(String neighborIP, String serverIP, int jumps, long delay) {
+    private void forward(String neighborIP, String serverIP, int jumps, long delay) {
         try {
             Socket socket = new Socket(neighborIP, 8090);
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -35,6 +37,15 @@ public class ServerTHD implements Runnable {
         } catch (IOException e) {
             System.out.println("Vizinho " + neighborIP + " não está conectado");
         }
+    }
+
+    private void printInfo() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+        System.out.println("---------TABELA DE ROTAS----------");
+        System.out.println(routs.toString());
+        System.out.println("---------TABELA DE FLUXOS---------");
+        System.out.println(flows.toString());
     }
 
     @Override
@@ -60,17 +71,16 @@ public class ServerTHD implements Runnable {
                     }
                 }
 
-                // System.out.print("\033[H\033[2J");
-                // System.out.flush();
-                // System.out.println(routs.toString());
+                printInfo();
             } else if (message.equals("FLOW")) {
                 String targetServer = in.readUTF();
 
                 if (targetServer.equals(this.socket.getLocalAddress().getHostAddress())) {
-                    System.out.println("CHEGUEI");
+                    flows.addFlowServer(this.socket.getInetAddress().getHostAddress());
                 } else {
-                    Rout rout = routs.routs.get(targetServer);
-                    String nextIP = rout.previousIP;
+                    String nextIP = routs.routs.get(targetServer).previousIP;
+
+                    this.flows.addFlow(targetServer, this.socket.getInetAddress().getHostAddress(), nextIP);
 
                     Socket socket = new Socket(nextIP, 8090);
                     DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -80,6 +90,8 @@ public class ServerTHD implements Runnable {
 
                     socket.close();
                 }
+
+                printInfo();
             }
 
             socket.close();
