@@ -9,9 +9,11 @@ import java.net.Socket;
 
 public class popWorker implements Runnable {
     private Routs routs;
+    private Flows flows;
 
-    public popWorker(Routs routs) {
+    public popWorker(Routs routs, Flows flows) {
         this.routs = routs;
+        this.flows = flows;
     }
 
     @Override
@@ -35,8 +37,9 @@ public class popWorker implements Runnable {
                     packet = new DatagramPacket(response, response.length, clientAddress, clientPort);
                     socket.send(packet);
                 } else {
-                    Rout rout = routs.routs.get(message);
-                    String nextIP = rout.previousIP;
+                    String nextIP = routs.routs.get(message).previousIP;
+
+                    this.flows.addFlow(message, clientAddress.getHostAddress(), nextIP);
 
                     Socket socket1 = new Socket(nextIP, 8090);
                     DataOutputStream out = new DataOutputStream(socket1.getOutputStream());

@@ -71,7 +71,7 @@ public class oNode {
             new Thread(new Server(neighbours, routs, flows)).start();
 
             // Servidor UDP para receber pacotes dos clientes
-            new Thread(new popWorker(routs)).start();
+            new Thread(new popWorker(routs, flows)).start();
 
             // Liga-se ao bootstrapper para pedir os vizinhos
             Socket socket = new Socket(args[1], 8080);
