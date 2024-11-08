@@ -123,29 +123,25 @@ public class Client {
     }
 
     class tearButtonListener implements ActionListener {
-        tearButtonListener() {
-        }
-
         public void actionPerformed(ActionEvent var1) {
             System.out.println("Teardown Button pressed !");
-            Client.this.cTimer.stop();
-
-
-            //Adicionado
-            Client.this.RTPsocket.close(); // Fecha o socket
-
-
+            cTimer.stop();
             System.exit(0);
         }
     }
 
     class playButtonListener implements ActionListener {
-        playButtonListener() {
-        }
+        public void actionPerformed(ActionEvent e){
 
-        public void actionPerformed(ActionEvent var1) {
             System.out.println("Play Button pressed !");
-            Client.this.cTimer.start();
+            cTimer.start();
+        }
+    }
+
+    class pauseButtonListener implements ActionListener {
+        public void actionPerformed(ActionEvent e){
+            System.out.println("Pause Button pressed !");
+            cTimer.stop();
         }
     }
 }

@@ -5,7 +5,7 @@ import java.util.List;
 public class Flow {
     String source;
     String previousIP;
-    List<String> targets;
+    public List<String> targets;
 
     public Flow(String source, String previousIP, List<String> targets) {
         this.source = source;

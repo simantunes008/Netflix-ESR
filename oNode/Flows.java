@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Flows {
-    List<Flow> flows;
+    public List<Flow> flows;
 
     public Flows() {
         this.flows = new ArrayList<>();
