@@ -1,9 +1,3 @@
-/* ------------------
-   Servidor
-   usage: java Servidor [Video file]
-   adaptado dos originais pela equipa docente de ESR (nenhumas garantias)
-   colocar primeiro o cliente a correr, porque este dispara logo
-   ---------------------- */
 package Streaming;
 
 import java.io.*;
@@ -14,150 +8,175 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.Timer;
 
+import oNode.Flows;
+import oNode.Flow;
 
-public class Server extends JFrame implements ActionListener {
+
+public class Server extends JFrame {
 
     //GUI:
-    //----------------
     JLabel label;
 
     //RTP variables:
-    //----------------
     DatagramPacket senddp; //UDP packet containing the video frames (to send)A
     DatagramSocket RTPsocket; //socket to be used to send and receive UDP packet
     int RTP_dest_port = 25000; //destination port for RTP packets
-    InetAddress ClientIPAddr; //Client IP address
 
     static String VideoFileName; //video file to request to the server
 
-    //Video constants:
-    //------------------
-    int imagenb = 0; //image nb of the image currently transmitted
     VideoStream video; //VideoStream object used to access video frames
     static int MJPEG_TYPE = 26; //RTP payload type for MJPEG video
     static int FRAME_PERIOD = 100; //Frame period of the video to stream, in ms
     static int VIDEO_LENGTH = 500; //length of the video in frames
 
-    Timer sTimer; //timer used to send the images at the video frame rate
-    byte[] sBuf; //buffer used to store the images to send to the client
+    private static Flows flows;
 
-    //--------------------------
-    //Constructor
-    //--------------------------
+    //Construtor teste para apenas um cliente
     public Server() {
-        //init Frame
+        // Configuração da GUI (opcional)
         super("Servidor");
-
-        // init para a parte do servidor
-        sTimer = new Timer(FRAME_PERIOD, this); //init Timer para servidor
-        sTimer.setInitialDelay(0);
-        sTimer.setCoalesce(true);
-        sBuf = new byte[15000]; //allocate memory for the sending buffer
+        label = new JLabel("Aguardando conexão do cliente...", JLabel.CENTER);
+        getContentPane().add(label, BorderLayout.CENTER);
+        setSize(300, 100);
+        setVisible(true);
 
         try {
-            RTPsocket = new DatagramSocket(); //iniciar o socket RTP
-            ClientIPAddr = InetAddress.getByName("127.0.0.1");
-            System.out.println("Servidor: socket " + ClientIPAddr);
-            video = new VideoStream(VideoFileName); //iniciar o objeto VideoStream
-            System.out.println("Servidor: vai enviar video da file " + VideoFileName);
+            video = new VideoStream(VideoFileName);
+            System.out.println("Servidor: Iniciando streaming do vídeo " + VideoFileName);
+        } catch (Exception e) {
+            System.out.println("Erro ao inicializar o vídeo: " + e.getMessage());
+            System.exit(0);
+        }
 
-            System.out.println("Servidor: Iniciando temporizador...");
-            sTimer.start();  // Iniciar o temporizador
-            System.out.println("Servidor: Temporizador iniciado");
+        try {
+            System.out.println("Servidor: Socket criado na porta " + RTPsocket.getLocalPort());
 
+            String clientIP = "192.168.1.100";
+            InetAddress ClientIPAddr = InetAddress.getByName(clientIP);
+            ClientHandler clientHandler = new ClientHandler(ClientIPAddr);
+            clientHandler.start();
+        } catch (Exception e) {
+            System.out.println("Erro ao processar cliente: " + e.getMessage());
+        }
 
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                System.exit(0);
+            }
+        });
+    }
 
+    //Construtor a ser usado
+    public Server(Flows flows){
+        this.flows = flows;
+
+        super("Servidor");
+        label = new JLabel("Send frame #        ", JLabel.CENTER);
+        getContentPane().add(label, BorderLayout.CENTER);
+
+        try {
+            RTPsocket = new DatagramSocket();
+            for (Flow f : flows.flows) {
+                for (String s : f.targets) {
+                    InetAddress ClientIP = InetAddress.getByName(s);
+                    new ClientHandler(ClientIP).start();
+                }
+            }
         } catch (SocketException e) {
             System.out.println("Servidor: erro no socket: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("Servidor: erro no video: " + e.getMessage());
         }
 
-        //Handler to close the main window
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                //stop the timer and exit
-                sTimer.stop();
                 System.exit(0);
-            }});
-
-        //GUI:
-        label = new JLabel("Send frame #        ", JLabel.CENTER);
-        getContentPane().add(label, BorderLayout.CENTER);
+            }
+        });
     }
 
-    //------------------------------------
+
     //main
-    //------------------------------------
     public static void main(String argv[]) throws Exception {
-
-        /*
-         * O servidor vai ter que se ligar a cada um do cliente através de uma thread
-         * Deste modo ele vai poder reccer os pacotes e encaminhar para o sítio correto
-         * Algo que ele também vai poder fazer (sendo este um point of presence) é mandar o vídeo para reprodução
-         * */
-
-        //get video filename to request:
         if (argv.length >= 1 ) {
             VideoFileName = argv[0];
-            System.out.println("Servidor: VideoFileName indicado como parametro: " + VideoFileName);
         } else  {
-            VideoFileName = "138Hitch.mov";
-            System.out.println("Servidor: parametro não foi indicado. VideoFileName = " + VideoFileName);
+            VideoFileName = "movie.Mjpeg";
         }
 
         File f = new File(VideoFileName);
         if (f.exists()) {
-            //Create a Main object
-            Server s = new Server();
+            Server s = new Server(flows);
             //show GUI: (opcional!)
             //s.pack();
             //s.setVisible(true);
         } else
-            System.out.println("Ficheiro de video não existe: " + VideoFileName);
+            System.out.println("\nINFO EXTRA: Não existe o seguinte vídeo " + VideoFileName);
     }
 
 
-    public void actionPerformed(ActionEvent e) {
-        System.out.println("actionPerformed: Preparando para enviar frame #" + imagenb);
-        // Se o número da imagem atual é menor que o comprimento do vídeo
-        if (imagenb < VIDEO_LENGTH) {
-            // Atualiza o número da imagem atual
-            imagenb++;
+    class ClientHandler extends Thread implements ActionListener{
+        private InetAddress clientIP;
+        private Timer timer;
+        private VideoStream video;
+        private int imagenb = 0;
+        private byte[] sBuf = new byte[15000];
 
+        public ClientHandler(InetAddress clientIP) {
+            this.clientIP = clientIP;
             try {
-                // Obtém o próximo frame para enviar do vídeo, assim como seu tamanho
-                int image_length = video.getnextframe(sBuf);
-
-                // Cria um objeto RTPpacket com o frame
-                RTPpacket rtp_packet = new RTPpacket(MJPEG_TYPE, imagenb, imagenb * FRAME_PERIOD, sBuf, image_length);
-
-                // Obtém o comprimento total do pacote RTP
-                int packet_length = rtp_packet.getlength();
-
-                // Recupera o bitstream do pacote e armazena em um array de bytes
-                byte[] packet_bits = new byte[packet_length];
-                rtp_packet.getpacket(packet_bits);
-
-                // Cria e envia o pacote como DatagramPacket pelo socket UDP
-                senddp = new DatagramPacket(packet_bits, packet_length, ClientIPAddr, RTP_dest_port);
-                System.out.println("actionPerformed: Preparando para enviar frame #" + imagenb);
-                System.out.println("Enviando pacote para " + ClientIPAddr + " na porta " + RTP_dest_port);
-                RTPsocket.send(senddp);
-                System.out.println("Pacote enviado.");
-
-                // Atualiza a GUI (opcional)
-                // label.setText("Send frame #" + imagenb);
-            } catch (Exception ex) {
-                System.out.println("Exceção capturada: " + ex);
-                ex.printStackTrace();
-                System.exit(0);
+                this.video = new VideoStream(VideoFileName);
+                this.timer = new Timer(FRAME_PERIOD, this);
+                this.timer.setInitialDelay(0);
+                this.timer.setCoalesce(true);
+            } catch (Exception e) {
+                System.out.println("Erro ao iniciar o vídeo para " + clientIP + ": " + e.getMessage());
             }
-        } else {
-            // Se alcançamos o final do vídeo, para o temporizador
-            sTimer.stop();
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            System.out.println("actionPerformed: Preparando para enviar frame #" + imagenb);
+            // Se o número da imagem atual é menor que o comprimento do vídeo
+            if (imagenb < VIDEO_LENGTH) {
+                // Atualiza o número da imagem atual
+                imagenb++;
+
+                try {
+                    // Primeiro frame + seu tamanho
+                    int image_length = video.getnextframe(sBuf);
+
+                    RTPpacket rtp_packet = new RTPpacket(MJPEG_TYPE, imagenb, imagenb * FRAME_PERIOD, sBuf, image_length);
+                    int packet_length = rtp_packet.getlength();
+
+                    // Get Bitstream do pacote e armazena em um array de bytes
+                    byte[] packet_bits = new byte[packet_length];
+                    rtp_packet.getpacket(packet_bits);
+
+                    // Cria e envia o pacote como DatagramPacket pelo socket UDP
+                    senddp = new DatagramPacket(packet_bits, packet_length, clientIP, RTP_dest_port);
+                    RTPsocket.send(senddp);
+                    System.out.println("Frame #" + imagenb + " enviado para " + clientIP);
+
+                    // Atualiza a GUI (opcional)
+                    // label.setText("Send frame #" + imagenb);
+                } catch (Exception ex) {
+                    System.out.println("Erro ao enviar frame para " + clientIP + ": " + ex.getMessage());
+                    ex.printStackTrace();
+                    timer.stop();
+                }
+            } else {
+                timer.stop(); // Para o temporizador se o vídeo acabou
+            }
+        }
+
+        // Inicia o temporizador quando a thread é iniciada
+        @Override
+        public void run() {
+            System.out.println("Iniciando envio de vídeo para " + clientIP);
+            timer.start();
         }
     }
+
 
 
 }//end of Class Servidor
