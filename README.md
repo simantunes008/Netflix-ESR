@@ -19,8 +19,19 @@ javac oNode/*.java
 ```bash
 java oNode.oNode -b configfiles/<CONFIG_FILE>
 ```
-- Executar os restantes no modo Servidor/Cliente
+- Executar o Servidor responsável pelo streaming
 ```bash
-java oNode.oNode -sc <BOOTSTRAPPER_IP>
+java oNode.oNode -sc <BOOTSTRAPPER_IP> <POINTS_OF_PRESENCE_FILE>
 ```
-
+- Executar os Nodos responśaveis por serem points of presence
+```bash
+java oNode.oNode -pop <BOOTSTRAPPER_IP>
+```
+- Executar os restantes Nodos
+```bash
+java oNode.oNode -n <BOOTSTRAPPER_IP>
+```
+- Executar o Cliente com o servidor ao qual nos pretendemos ligar
+```bash
+java oNode.oClient <SERVER_IP>
+```
