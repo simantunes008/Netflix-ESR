@@ -10,7 +10,7 @@ import java.net.InetAddress;
 import java.util.*;
 
 public class ServerUDP implements Runnable {
-    private String configFile;
+    private final String configFile;
 
     public ServerUDP(String configFile) {
         this.configFile = configFile;
@@ -30,6 +30,8 @@ public class ServerUDP implements Runnable {
             DatagramSocket socket = new DatagramSocket(8070);
             System.out.println("Configuração carregada!");
             System.out.println("Servidor UDP à escuta na porta 8070");
+
+            // TODO: Implementar threads
 
             while (true) {
                 byte[] buf = new byte[1024];

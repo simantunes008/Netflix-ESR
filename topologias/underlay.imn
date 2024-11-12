@@ -245,10 +245,11 @@ node n10 {
 	!
     }
     canvas c1
-    iconcoords {761.0 112.0}
-    labelcoords {761.0 144.0}
+    iconcoords {762.0 119.0}
+    labelcoords {762.0 151.0}
     interface-peer {eth0 n5}
     interface-peer {eth1 n15}
+    custom-image /usr/local/share/core/icons/normal/router_green.gif
 }
 
 node n12 {
@@ -279,13 +280,14 @@ node n12 {
 	!
     }
     canvas c1
-    iconcoords {722.0 379.0}
-    labelcoords {722.0 411.0}
+    iconcoords {761.0 375.0}
+    labelcoords {761.0 407.0}
     interface-peer {eth0 n5}
     interface-peer {eth1 n8}
     interface-peer {eth2 n17}
     interface-peer {eth3 n15}
     interface-peer {eth4 n16}
+    custom-image /usr/local/share/core/icons/normal/router_green.gif
 }
 
 node n14 {
@@ -304,10 +306,11 @@ node n14 {
 	!
     }
     canvas c1
-    iconcoords {758.0 647.0}
-    labelcoords {758.0 679.0}
+    iconcoords {760.0 645.0}
+    labelcoords {760.0 677.0}
     interface-peer {eth0 n8}
     interface-peer {eth1 n17}
+    custom-image /usr/local/share/core/icons/normal/router_green.gif
 }
 
 node n15 {
@@ -345,6 +348,7 @@ node n15 {
     interface-peer {eth2 n18}
     interface-peer {eth3 n19}
     interface-peer {eth4 n16}
+    custom-image /usr/local/share/core/icons/normal/router_green.gif
 }
 
 node n16 {
@@ -398,8 +402,8 @@ node n17 {
 	!
     }
     canvas c1
-    iconcoords {1005.0 526.0}
-    labelcoords {1005.0 558.0}
+    iconcoords {1013.0 515.0}
+    labelcoords {1013.0 547.0}
     interface-peer {eth0 n12}
     interface-peer {eth1 n14}
     interface-peer {eth2 n19}
@@ -456,13 +460,14 @@ node n19 {
 	!
     }
     canvas c1
-    iconcoords {1247.0 380.0}
-    labelcoords {1247.0 412.0}
+    iconcoords {1236.0 377.0}
+    labelcoords {1236.0 409.0}
     interface-peer {eth0 n20}
     interface-peer {eth1 n15}
     interface-peer {eth2 n16}
     interface-peer {eth3 n17}
     interface-peer {eth4 n21}
+    custom-image /usr/local/share/core/icons/normal/router_green.gif
 }
 
 node n20 {
@@ -489,8 +494,8 @@ node n20 {
 	!
     }
     canvas c1
-    iconcoords {1483.0 241.0}
-    labelcoords {1483.0 273.0}
+    iconcoords {1462.0 242.0}
+    labelcoords {1462.0 274.0}
     interface-peer {eth0 n18}
     interface-peer {eth1 n19}
     interface-peer {eth2 n21}
@@ -521,12 +526,13 @@ node n21 {
 	!
     }
     canvas c1
-    iconcoords {1484.0 526.0}
-    labelcoords {1484.0 558.0}
+    iconcoords {1463.0 517.0}
+    labelcoords {1463.0 549.0}
     interface-peer {eth0 n19}
     interface-peer {eth1 n17}
     interface-peer {eth2 n20}
     interface-peer {eth3 n22}
+    custom-image /usr/local/share/core/icons/normal/router_green.gif
 }
 
 node n22 {
@@ -536,8 +542,8 @@ node n22 {
 	!
     }
     canvas c1
-    iconcoords {1643.0 381.0}
-    labelcoords {1643.0 405.0}
+    iconcoords {1632.0 384.0}
+    labelcoords {1632.0 408.0}
     interface-peer {e0 n20}
     interface-peer {e1 n21}
     interface-peer {e2 n1}
@@ -597,11 +603,13 @@ link l1 {
 }
 
 link l8 {
+    delay 20000
     nodes {n5 n7}
     bandwidth 0
 }
 
 link l9 {
+    delay 20000
     nodes {n6 n8}
     bandwidth 0
 }
@@ -618,18 +626,19 @@ link l11 {
 }
 
 link l12 {
+    delay 5000
     nodes {n5 n12}
     bandwidth 0
 }
 
 link l13 {
-    delay 5000
+    delay 10000
     nodes {n8 n12}
     bandwidth 0
 }
 
 link l14 {
-    delay 20000
+    delay 5000
     nodes {n8 n14}
     bandwidth 0
 }

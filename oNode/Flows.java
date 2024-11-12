@@ -1,10 +1,12 @@
 package oNode;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Flows {
-    public List<Flow> flows;
+    List<Flow> flows;
 
     public Flows() {
         this.flows = new ArrayList<>();
@@ -21,7 +23,7 @@ public class Flows {
 
     public void addFlow(String source, String previousIP, String nextIP) {
         if (!exists(source)) {
-            List<String> targets = new ArrayList<>();
+            Set<String> targets = new HashSet<>();
             targets.add(previousIP);
             this.flows.add(new Flow(source, nextIP, targets));
         } else {
@@ -35,7 +37,7 @@ public class Flows {
 
     public void addFlowServer(String IP) {
         if (this.flows.isEmpty()){
-            List<String> targets = new ArrayList<>();
+            Set<String> targets = new HashSet<>();
             targets.add(IP);
             this.flows.add(new Flow("", "", targets));
         } else {

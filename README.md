@@ -9,29 +9,29 @@
 ```bash
 sudo core
 ```
-- Abrir e iniciar uma topologia
+- Abrir e iniciar uma topologia (por exemplo a underlay.imn)
 - Abrir uma janela bash, ir para a pasta do projeto e compilar os fichieros da pasta oNode
 ```bash
 cd /home/core/ESR2024/
 javac oNode/*.java
 ```
-- Executar o Bootstrapper
+- Executar o Bootstrapper (na underlay.imn usar o ficheiro overlay)
 ```bash
-java oNode.oNode -b configfiles/<CONFIG_FILE>
+java oNode.oNode -b configfiles/[CONFIG_FILE]
 ```
-- Executar o Servidor responsável pelo streaming
+- Executar o Servidor responsável pelo streaming (na underlay.imn usar o ficheiro pop)
 ```bash
-java oNode.oNode -sc <BOOTSTRAPPER_IP> <POINTS_OF_PRESENCE_FILE>
+java oNode.oNode -s configfiles/[POP_FILE] [BOOTSTRAPPER_IP]
 ```
 - Executar os Nodos responśaveis por serem points of presence
 ```bash
-java oNode.oNode -pop <BOOTSTRAPPER_IP>
+java oNode.oNode -pop [BOOTSTRAPPER_IP]
 ```
-- Executar os restantes Nodos
+- Executar os restantes Nodos (na underlay.imn os nodos verdes)
 ```bash
-java oNode.oNode -n <BOOTSTRAPPER_IP>
+java oNode.oNode [BOOTSTRAPPER_IP]
 ```
 - Executar o Cliente com o servidor ao qual nos pretendemos ligar
 ```bash
-java oNode.oClient <SERVER_IP>
+java oNode.oClient [SERVER_IP]
 ```

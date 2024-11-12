@@ -23,10 +23,10 @@ public class oNode {
             new Thread(new Server(neighbours, routs, flows)).start();
 
             // Servidor UDP para enviar a lista de points of presence
-            new Thread(new ServerUDP(args[2])).start();
+            new Thread(new ServerUDP(args[1])).start();
 
             // Liga-se ao bootstrapper para pedir os vizinhos
-            Socket socket = new Socket(args[1], 8080);
+            Socket socket = new Socket(args[2], 8080);
 
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -44,27 +44,6 @@ public class oNode {
 
             // Executa o monitor da rede Overlay
             new Thread(new Monitor(neighbours)).start();
-
-        } else if (args.length == 2 && args[0].equals("-n")) {
-            // Inicia o servidor para enviar pacotes
-            new Thread(new Server(neighbours, routs, flows)).start();
-
-            // Liga-se ao bootstrapper para pedir os vizinhos
-            Socket socket = new Socket(args[1], 8080);
-
-            DataInputStream in = new DataInputStream(socket.getInputStream());
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-
-            out.writeUTF("JOIN");
-
-            int size = in.readInt();
-
-            for (int i = 0; i < size; i++) {
-                neighbours.add(in.readUTF());
-            }
-
-            out.writeUTF("CLOSE");
-            socket.close();
 
         } else if (args.length == 2 && args[0].equals("-pop")) {
             // Inicia o servidor para enviar pacotes
@@ -90,8 +69,33 @@ public class oNode {
             out.writeUTF("CLOSE");
             socket.close();
 
+        } else if (args.length == 1) {
+            // Inicia o servidor para enviar pacotes
+            new Thread(new Server(neighbours, routs, flows)).start();
+
+            // Liga-se ao bootstrapper para pedir os vizinhos
+            Socket socket = new Socket(args[0], 8080);
+
+            DataInputStream in = new DataInputStream(socket.getInputStream());
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
+            out.writeUTF("JOIN");
+
+            int size = in.readInt();
+
+            for (int i = 0; i < size; i++) {
+                neighbours.add(in.readUTF());
+            }
+
+            out.writeUTF("CLOSE");
+            socket.close();
+
         } else {
-            System.out.println("Opções de utilização inválidas");
+            System.out.println("Usage:\n" +
+                    " Bootstrapper            java oNode.oNode -b [CONFIG_FILE]\n" +
+                    " Stream Server           java oNode.oNode -s [POP_FILE] [BOOTSTRAPPER_IP]\n" +
+                    " Point of Presence Node  java oNode.oNode -pop [BOOTSTRAPPER_IP]\n" +
+                    " Normal Node             java oNode.oNode [BOOTSTRAPPER_IP]");
         }
     }
 }

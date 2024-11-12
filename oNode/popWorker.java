@@ -20,8 +20,9 @@ public class popWorker implements Runnable {
     public void run() {
         try {
             DatagramSocket socket = new DatagramSocket(8070);
-            System.out.println("Configuração carregada!");
             System.out.println("Servidor UDP à escuta na porta 8070");
+
+            // TODO: Implementar threads
 
             while (true) {
                 byte[] buf = new byte[1024];

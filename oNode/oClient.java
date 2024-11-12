@@ -69,6 +69,9 @@ public class oClient {
             socket.send(pingPacket);
 
             socket.close();
+        } else {
+            System.out.println("Usage:\n" +
+                    " Client                   java oNode.oClient [SERVER_IP]");
         }
     }
 }
