@@ -26,7 +26,7 @@ java oNode.oNode -b configfiles/[CONFIG_FILE]
 - Executar o Servidor responsável pelo streaming (na underlay.imn usar o ficheiro pop)
 ```bash
 xhost +
-export DISPLAY =:0.0
+export DISPLAY=:0.0
 ```
 ```bash
 java oNode.oNode -s configfiles/[POP_FILE] [BOOTSTRAPPER_IP]
@@ -41,7 +41,7 @@ java oNode.oNode [BOOTSTRAPPER_IP]
 ```
 - Executar o Cliente com o servidor ao qual nos pretendemos ligar
 ```bash
-export DISPLAY =:0.0
+export DISPLAY=:0.0
 ```
 ```bash
 java oNode.oClient [SERVER_IP]
