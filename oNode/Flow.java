@@ -5,7 +5,7 @@ import java.util.Set;
 public class Flow {
     String source;
     String previousIP;
-    Set<String> targets;
+    public Set<String> targets;
 
     public Flow(String source, String previousIP, Set<String> targets) {
         this.source = source;

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Flows {
-    List<Flow> flows;
+    public List<Flow> flows;
 
     public Flows() {
         this.flows = new ArrayList<>();

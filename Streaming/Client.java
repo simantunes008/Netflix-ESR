@@ -17,9 +17,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.PrintStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
+import java.net.*;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -43,13 +41,9 @@ public class Client {
     static int RTP_RCV_PORT = 25000;
     Timer cTimer;
     byte[] cBuf;
+    String server_ip;
 
-    public Client() {
-
-        /*duas vertentes de um cliente:
-            1. Se ele for reproduzir o vídeo,
-         */
-
+    public Client(String servidor) {
         this.f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent var1) {
                 System.exit(0);
@@ -76,21 +70,38 @@ public class Client {
         this.cTimer.setCoalesce(true);
         this.cBuf = new byte[15000];
 
+        this.server_ip = servidor;
+
         try {
+
+            // Envia mensagem inicial para o servidor
+            DatagramSocket setupSocket = new DatagramSocket();
+            InetAddress serverAddress = InetAddress.getByName(server_ip);
+            String startMessage = "START";
+            DatagramPacket startPacket = new DatagramPacket(startMessage.getBytes(), startMessage.length(), serverAddress, RTP_RCV_PORT);
+            setupSocket.send(startPacket);
+            setupSocket.close();
+
+            System.out.println("Mensagem 'START' enviada ao servidor ");
+
+
             this.RTPsocket = new DatagramSocket(RTP_RCV_PORT);
-            System.out.println("Client Here!! I'm connected on port: " + RTP_RCV_PORT);
+            System.out.println("Cliente de streaming, e estou conectado na porta " + RTP_RCV_PORT);
             //this.RTPsocket.setSoTimeout(5000);
             // Adicionado
             this.cTimer.start();
         } catch (SocketException var2) {
-            System.out.println("Cliente: erro no socket: " + var2.getMessage());
+            System.out.println("Cliente Streaming: erro no socket: " + var2.getMessage());
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
     }
 
-    public static void main(String[] var0) throws Exception {
+    /*public static void main(String[] var0) throws Exception {
         new Client();
-    }
+    }*/
 
     class clientTimerListener implements ActionListener {
         clientTimerListener() {

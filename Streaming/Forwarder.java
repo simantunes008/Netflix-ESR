@@ -41,6 +41,7 @@ public class Forwarder {
 
 
     public Forwarder(Flows flows){
+
         this.flows = flows;
         receiveTimer = new Timer(20, new clientTimerListener());
         receiveTimer.setInitialDelay(0);
@@ -50,12 +51,11 @@ public class Forwarder {
 
         try{
             Socket_receiver = new DatagramSocket(RTP_port);
-            Socket_receiver.setSoTimeout(1);
         } catch (SocketException e) {
             throw new RuntimeException(e);
         }
 
-        while(true) receiveTimer.start();
+       receiveTimer.start();
     }
 
 
@@ -68,6 +68,7 @@ public class Forwarder {
                 if (imagenb < VIDEO_LENGTH){
                     try{
                         Socket_receiver.receive(receivePacket);
+                        System.out.println("Pacote recebido: SeqNum # " + imagenb + " de " + receivePacket.getAddress() + ":" + receivePacket.getPort());
 
                         for (Flow f : flows.flows){
                             for (String s : f.targets){
@@ -78,10 +79,12 @@ public class Forwarder {
                                     public void run() {
                                         receivePacket.setAddress(ip);
                                         receivePacket.setPort(RTP_port);
+                                        System.out.println("Encaminhando pacote para " + ip + ":" + RTP_port);
 
                                         try {
                                             Socket_sender = new DatagramSocket();
                                             Socket_sender.send(receivePacket);
+                                            System.out.println("Pacote encaminhado para " + ip);
                                         } catch (IOException e) {
                                             throw new RuntimeException(e);
                                         }

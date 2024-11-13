@@ -3,6 +3,8 @@ package oNode;
 import java.io.IOException;
 import java.net.*;
 
+import Streaming.Client;
+
 public class oClient {
     private static final int TIMEOUT = 1000;
     private static final int PING_ATTEMPTS = 3;
@@ -68,7 +70,14 @@ public class oClient {
             DatagramPacket pingPacket = new DatagramPacket(pingMessage, pingMessage.length, InetAddress.getByName(bestServer), 8070);
             socket.send(pingPacket);
 
+            // Inicia o cliente de streaming
+            System.out.println("#NEXT# : CLIENTE DE STREAMING");
+            new Streaming.Client(args[0]);
+
             socket.close();
+
+
+
         } else {
             System.out.println("Usage:\n" +
                     " Client                   java oNode.oClient [SERVER_IP]");

@@ -3,7 +3,6 @@ package Streaming;
 import java.io.*;
 import java.net.*;
 import java.awt.*;
-import java.util.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.Timer;
@@ -12,7 +11,7 @@ import oNode.Flows;
 import oNode.Flow;
 
 
-public class Server extends JFrame {
+public class Server_str extends JFrame {
 
     //GUI:
     JLabel label;
@@ -22,7 +21,7 @@ public class Server extends JFrame {
     DatagramSocket RTPsocket; //socket to be used to send and receive UDP packet
     int RTP_dest_port = 25000; //destination port for RTP packets
 
-    static String VideoFileName; //video file to request to the server
+    static String VideoFileName = "Streaming/movie.Mjpeg"; //video file to request to the server
 
     VideoStream video; //VideoStream object used to access video frames
     static int MJPEG_TYPE = 26; //RTP payload type for MJPEG video
@@ -31,68 +30,61 @@ public class Server extends JFrame {
 
     private static Flows flows;
 
-    //Construtor teste para apenas um cliente
-    public Server() {
-        // Configuração da GUI (opcional)
-        super("Servidor");
-        label = new JLabel("Aguardando conexão do cliente...", JLabel.CENTER);
-        getContentPane().add(label, BorderLayout.CENTER);
-        setSize(300, 100);
-        setVisible(true);
-
-        try {
-            video = new VideoStream(VideoFileName);
-            System.out.println("Servidor: Iniciando streaming do vídeo " + VideoFileName);
-        } catch (Exception e) {
-            System.out.println("Erro ao inicializar o vídeo: " + e.getMessage());
-            System.exit(0);
-        }
-
-        try {
-            System.out.println("Servidor: Socket criado na porta " + RTPsocket.getLocalPort());
-
-            String clientIP = "192.168.1.100";
-            InetAddress ClientIPAddr = InetAddress.getByName(clientIP);
-            ClientHandler clientHandler = new ClientHandler(ClientIPAddr);
-            clientHandler.start();
-        } catch (Exception e) {
-            System.out.println("Erro ao processar cliente: " + e.getMessage());
-        }
-
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
-    }
-
     //Construtor a ser usado
-    public Server(Flows flows){
+    public Server_str(Flows flows) {
+        super("Servidor");
+
+        System.out.println("Sou o servidor de Streaming e inicializei. \n");
+
         this.flows = flows;
 
-        super("Servidor");
         label = new JLabel("Send frame #        ", JLabel.CENTER);
         getContentPane().add(label, BorderLayout.CENTER);
 
         try {
+            // Criação do socket de envio
             RTPsocket = new DatagramSocket();
-            for (Flow f : flows.flows) {
-                for (String s : f.targets) {
-                    InetAddress ClientIP = InetAddress.getByName(s);
-                    new ClientHandler(ClientIP).start();
-                }
-            }
-        } catch (SocketException e) {
-            System.out.println("Servidor: erro no socket: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Servidor: erro no video: " + e.getMessage());
-        }
 
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
+            // Criação do socket de escuta
+            DatagramSocket listeningSocket = new DatagramSocket(25000); // Porta do servidor para conexões
+            System.out.println("Servidor: aguardando conexões na porta 25000");
+
+            // Thread para escutar conexões dos clientes
+            new Thread(() -> {
+                while (true) {
+                    try {
+                        byte[] buffer = new byte[1024];
+                        DatagramPacket request = new DatagramPacket(buffer, buffer.length);
+
+                        // Recebe mensagem de conexão do cliente
+                        listeningSocket.receive(request);
+                        String message = new String(request.getData(), 0, request.getLength());
+                        System.out.println("Servidor recebeu: " + message);
+
+                        if (message.equals("START")) {
+                            // Processamento dos fluxos
+                            for (Flow f : flows.flows) {
+                                for (String s : f.targets) {
+                                    InetAddress ClientIP = InetAddress.getByName(s);
+                                    new ClientHandler(ClientIP).start();
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Erro ao escutar conexões: " + e.getMessage());
+                    }
+                }
+            }).start();
+
+
+            addWindowListener(new WindowAdapter() {
+                public void windowClosing(WindowEvent e) {
+                    System.exit(0);
+                }
+            });
+        } catch (SocketException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -106,7 +98,7 @@ public class Server extends JFrame {
 
         File f = new File(VideoFileName);
         if (f.exists()) {
-            Server s = new Server(flows);
+            Server_str s = new Server_str(flows);
             //show GUI: (opcional!)
             //s.pack();
             //s.setVisible(true);
@@ -172,7 +164,7 @@ public class Server extends JFrame {
         // Inicia o temporizador quando a thread é iniciada
         @Override
         public void run() {
-            System.out.println("Iniciando envio de vídeo para " + clientIP);
+            System.out.println("Iniciando envio de vídeo " + VideoFileName + " para " + clientIP);
             timer.start();
         }
     }

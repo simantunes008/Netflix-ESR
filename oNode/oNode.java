@@ -1,11 +1,16 @@
 package oNode;
 
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+
+import Streaming.Server_str;
+import Streaming.Forwarder;
+
 
 public class oNode {
     public static void main(String[] args) throws IOException {
@@ -45,6 +50,9 @@ public class oNode {
             // Executa o monitor da rede Overlay
             new Thread(new Monitor(neighbours)).start();
 
+            //Incialização do servidor para Streaming;
+            new Server_str(flows);
+
         } else if (args.length == 2 && args[0].equals("-pop")) {
             // Inicia o servidor para enviar pacotes
             new Thread(new Server(neighbours, routs, flows)).start();
@@ -69,6 +77,9 @@ public class oNode {
             out.writeUTF("CLOSE");
             socket.close();
 
+            //Inicialização do Encaminhador para o Streaming
+            new Streaming.Forwarder(flows);
+
         } else if (args.length == 1) {
             // Inicia o servidor para enviar pacotes
             new Thread(new Server(neighbours, routs, flows)).start();
@@ -89,6 +100,9 @@ public class oNode {
 
             out.writeUTF("CLOSE");
             socket.close();
+
+            //Inicialização do Encaminhador para o Streaming
+            new Streaming.Forwarder(flows);
 
         } else {
             System.out.println("Usage:\n" +
