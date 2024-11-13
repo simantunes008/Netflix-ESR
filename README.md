@@ -9,7 +9,7 @@
 ```bash
 sudo core
 ```
-- Em outra janela de terminal, executar o comando
+- Noutra janela de terminal, executar o comando
 ```bash
 xhost +
 ```  
@@ -27,8 +27,6 @@ java oNode.oNode -b configfiles/[CONFIG_FILE]
 ```bash
 xhost +
 export DISPLAY=:0.0
-```
-```bash
 java oNode.oNode -s configfiles/[POP_FILE] [BOOTSTRAPPER_IP]
 ```
 - Executar os Nodos responśaveis por serem points of presence
@@ -42,7 +40,5 @@ java oNode.oNode [BOOTSTRAPPER_IP]
 - Executar o Cliente com o servidor ao qual nos pretendemos ligar
 ```bash
 export DISPLAY=:0.0
-```
-```bash
 java oNode.oClient [SERVER_IP]
 ```
