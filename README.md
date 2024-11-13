@@ -9,6 +9,10 @@
 ```bash
 sudo core
 ```
+- Em outra janela de terminal, executar o comando
+```bash
+xhost +
+```  
 - Abrir e iniciar uma topologia (por exemplo a underlay.imn)
 - Abrir uma janela bash, ir para a pasta do projeto e compilar os fichieros da pasta oNode
 ```bash
@@ -21,6 +25,10 @@ java oNode.oNode -b configfiles/[CONFIG_FILE]
 ```
 - Executar o Servidor responsável pelo streaming (na underlay.imn usar o ficheiro pop)
 ```bash
+xhost +
+export DISPLAY =:0.0
+```
+```bash
 java oNode.oNode -s configfiles/[POP_FILE] [BOOTSTRAPPER_IP]
 ```
 - Executar os Nodos responśaveis por serem points of presence
@@ -32,6 +40,9 @@ java oNode.oNode -pop [BOOTSTRAPPER_IP]
 java oNode.oNode [BOOTSTRAPPER_IP]
 ```
 - Executar o Cliente com o servidor ao qual nos pretendemos ligar
+```bash
+export DISPLAY =:0.0
+```
 ```bash
 java oNode.oClient [SERVER_IP]
 ```
