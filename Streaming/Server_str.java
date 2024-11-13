@@ -4,8 +4,6 @@ import java.io.*;
 import java.net.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
-import java.util.List;
 import javax.swing.*;
 import javax.swing.Timer;
 
@@ -31,9 +29,6 @@ public class Server_str extends JFrame {
     static int VIDEO_LENGTH = 500; //length of the video in frames
 
     private static Flows flows;
-
-    private List<String> clients = new ArrayList<>(); // Lista de clientes
-    private int currentFrame = 0; // Contador de frames
 
     //Construtor a ser usado
     public Server_str(Flows flows) {
@@ -70,14 +65,8 @@ public class Server_str extends JFrame {
                             // Processamento dos fluxos
                             for (Flow f : flows.flows) {
                                 for (String s : f.targets) {
-                                    //
-                                    synchronized (clients) {
-                                        if (!clients.contains(s)){
-                                            clients.add(s);
-                                            // Inicia um novo handler com o frame atual
-                                            new ClientHandler(s, currentFrame).start();
-                                        }
-                                    }
+                                    InetAddress ClientIP = InetAddress.getByName(s);
+                                    new ClientHandler(ClientIP).start();
                                 }
                             }
                         }
@@ -119,22 +108,16 @@ public class Server_str extends JFrame {
 
 
     class ClientHandler extends Thread implements ActionListener{
-        private String clientIP;
+        private InetAddress clientIP;
         private Timer timer;
         private VideoStream video;
         private int imagenb = 0;
         private byte[] sBuf = new byte[15000];
 
-        public ClientHandler(String clientIP, int startFrame) {
+        public ClientHandler(InetAddress clientIP) {
             this.clientIP = clientIP;
-            this.imagenb = startFrame; // Inicia no frame atual do servidor
-
             try {
                 this.video = new VideoStream(VideoFileName);
-                // Pula os frames anteriores para sincronizar com o servidor
-                for (int i = 0; i < startFrame; i++) {
-                    video.getnextframe(sBuf);
-                }
                 this.timer = new Timer(FRAME_PERIOD, this);
                 this.timer.setInitialDelay(0);
                 this.timer.setCoalesce(true);
@@ -162,7 +145,7 @@ public class Server_str extends JFrame {
                     rtp_packet.getpacket(packet_bits);
 
                     // Cria e envia o pacote como DatagramPacket pelo socket UDP
-                    senddp = new DatagramPacket(packet_bits, packet_length, InetAddress.getByName(clientIP), RTP_dest_port);
+                    senddp = new DatagramPacket(packet_bits, packet_length, clientIP, RTP_dest_port);
                     RTPsocket.send(senddp);
                     System.out.println("Frame #" + imagenb + " enviado para " + clientIP);
 
