@@ -25,8 +25,8 @@ java oNode.oNode -b configfiles/[CONFIG_FILE]
 ```
 - Executar o Servidor responsável pelo streaming (na underlay.imn usar o ficheiro pop)
 ```bash
-xhost +
 export DISPLAY=:0.0
+xhost +
 java oNode.oNode -s configfiles/[POP_FILE] [BOOTSTRAPPER_IP]
 ```
 - Executar os Nodos responśaveis por serem points of presence
