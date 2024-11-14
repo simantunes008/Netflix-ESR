@@ -30,6 +30,8 @@ public class Server_str extends JFrame {
 
     private static Flows flows;
 
+    boolean isStreaming = false;
+
     //Construtor a ser usado
     public Server_str(Flows flows) {
         super("Servidor");
@@ -61,7 +63,9 @@ public class Server_str extends JFrame {
                         String message = new String(request.getData(), 0, request.getLength());
                         System.out.println("Servidor recebeu: " + message);
 
-                        if (message.equals("START")) {
+                        if (message.equals("START") && !isStreaming) {
+                            // Está a fazer stream
+                            isStreaming = true;
                             // Processamento dos fluxos
                             for (Flow f : flows.flows) {
                                 for (String s : f.targets) {
@@ -109,6 +113,7 @@ public class Server_str extends JFrame {
 
     class ClientHandler extends Thread implements ActionListener{
         private InetAddress clientIP;
+        private Server_str server;
         private Timer timer;
         private VideoStream video;
         private int imagenb = 0;
@@ -116,6 +121,7 @@ public class Server_str extends JFrame {
 
         public ClientHandler(InetAddress clientIP) {
             this.clientIP = clientIP;
+            this.server = Server_str.this;
             try {
                 this.video = new VideoStream(VideoFileName);
                 this.timer = new Timer(FRAME_PERIOD, this);
@@ -157,6 +163,7 @@ public class Server_str extends JFrame {
                     timer.stop();
                 }
             } else {
+                server.isStreaming = false;
                 timer.stop(); // Para o temporizador se o vídeo acabou
             }
         }
