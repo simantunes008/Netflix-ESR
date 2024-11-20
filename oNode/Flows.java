@@ -41,7 +41,7 @@ public class Flows {
             targets.add(IP);
             this.flows.add(new Flow("", "", targets));
         } else {
-            if (this.flows.get(0).targets.contains(IP)){
+            if (this.flows.get(0).targets.contains(IP)) {
                 return;
             } else{
                 this.flows.get(0).targets.add(IP);

@@ -92,6 +92,25 @@ public class ServerTHD implements Runnable {
                 }
 
                 printInfo();
+            } else if (message.equals("END")) {
+                String targetServer = in.readUTF();
+
+                for (Flow f : this.flows.flows) {
+                    if (f.source.equals(targetServer)) {
+                        f.targets.remove(this.socket.getInetAddress().getHostAddress());
+                        if (f.targets.isEmpty()) {
+                            String nextIP = routs.routs.get(targetServer).previousIP;
+
+                            Socket socket = new Socket(nextIP, 8090);
+                            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
+                            out.writeUTF("END");
+                            out.writeUTF(targetServer);
+
+                            socket.close();
+                        }
+                    }
+                }
             }
 
             socket.close();

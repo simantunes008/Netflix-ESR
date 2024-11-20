@@ -66,7 +66,7 @@ public class oClient {
                 }
             }
 
-            byte[] pingMessage = args[0].getBytes();
+            byte[] pingMessage = ("FLOW," + args[0]).getBytes();
             DatagramPacket pingPacket = new DatagramPacket(pingMessage, pingMessage.length, InetAddress.getByName(bestServer), 8070);
             socket.send(pingPacket);
 
