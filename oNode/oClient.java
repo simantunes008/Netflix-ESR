@@ -25,7 +25,7 @@ public class oClient {
             String response = new String(responsePacket.getData(), 0, responsePacket.getLength());
             String[] pointsOfPresence = response.split(",");
 
-            String bestServer = "";
+            String bestNode = "";
             long bestLatency = Long.MAX_VALUE;
 
             for (String pop : pointsOfPresence) {
@@ -58,7 +58,7 @@ public class oClient {
                     System.out.println("----------------------------------");
                     if (averageLatency < bestLatency) {
                         bestLatency = averageLatency;
-                        bestServer = pop;
+                        bestNode = pop;
                     }
 
                 } else {
@@ -67,16 +67,12 @@ public class oClient {
             }
 
             byte[] pingMessage = ("FLOW," + args[0]).getBytes();
-            DatagramPacket pingPacket = new DatagramPacket(pingMessage, pingMessage.length, InetAddress.getByName(bestServer), 8070);
+            DatagramPacket pingPacket = new DatagramPacket(pingMessage, pingMessage.length, InetAddress.getByName(bestNode), 8070);
             socket.send(pingPacket);
 
             // Inicia o cliente de streaming
             System.out.println("#NEXT# : CLIENTE DE STREAMING");
-            new Streaming.Client(args[0]);
-
-            socket.close();
-
-
+            new Streaming.Client(args[0], bestNode, socket);
 
         } else {
             System.out.println("Usage:\n" +

@@ -42,8 +42,10 @@ public class Client {
     Timer cTimer;
     byte[] cBuf;
     String server_ip;
+    String pop;
+    DatagramSocket socket;
 
-    public Client(String servidor) {
+    public Client(String servidor, String pop, DatagramSocket socket) {
         this.f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent var1) {
                 System.exit(0);
@@ -71,6 +73,12 @@ public class Client {
         this.cBuf = new byte[15000];
 
         this.server_ip = servidor;
+        this.pop = pop;
+        this.socket = socket;
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            sendEndMessage();
+        }));
 
         try {
 
@@ -130,6 +138,18 @@ public class Client {
                 System.out.println("Exception caught: " + var8);
             }
 
+        }
+    }
+
+    private void sendEndMessage() {
+        try {
+            byte[] endMessage = ("END," + this.server_ip).getBytes();
+            DatagramPacket endPacket = new DatagramPacket(endMessage, endMessage.length, InetAddress.getByName(this.pop), 8070);
+            this.socket.send(endPacket);
+            System.out.println("Mensagem 'END' enviada para " + this.pop);
+            this.socket.close();
+        } catch (IOException e) {
+            System.out.println("Erro ao enviar mensagem 'END': " + e.getMessage());
         }
     }
 
