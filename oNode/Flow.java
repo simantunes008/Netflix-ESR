@@ -4,14 +4,14 @@
 
 package oNode;
 
-import java.util.List;
+import java.util.Set;
 
 public class Flow {
     String source;
     String previousIP;
-    public List<String> targets;
+    public Set<String> targets;
 
-    public Flow(String source, String previousIP, List<String> targets) {
+    public Flow(String source, String previousIP, Set<String> targets) {
         this.source = source;
         this.previousIP = previousIP;
         this.targets = targets;
