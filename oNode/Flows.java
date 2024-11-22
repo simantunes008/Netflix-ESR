@@ -4,59 +4,30 @@
 
 package oNode;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Flows {
-    public List<Flow> flows;
+    public Map<String, Flow> flows;
 
     public Flows() {
-        this.flows = new ArrayList<>();
+        this.flows = new HashMap<>();
     }
 
-    private boolean exists(String source) {
-        for (Flow flow : flows) {
-            if (flow.source.equals(source)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void addFlow(String source, String previousIP, String nextIP) {
-        if (!exists(source)) {
+    public void addFlow(String content, String source, String previousIP, String nextIP) {
+        if (!this.flows.containsKey(content)) {
             Set<String> targets = new HashSet<>();
             targets.add(previousIP);
-            this.flows.add(new Flow(source, nextIP, targets));
+            this.flows.put(content, new Flow(source, nextIP, targets));
         } else {
-            for (Flow flow : flows) {
-                if (flow.source.equals(source)) {
-                    flow.targets.add(previousIP);
-                }
-            }
-        }
-    }
-
-    public void addFlowServer(String IP) {
-        if (this.flows.isEmpty()){
-            Set<String> targets = new HashSet<>();
-            targets.add(IP);
-            this.flows.add(new Flow("", "", targets));
-        } else {
-            if (this.flows.get(0).targets.contains(IP)) {
-                return;
-            } else{
-                this.flows.get(0).targets.add(IP);
-            }
+            Flow flow = this.flows.get(content);
+            flow.targets.add(previousIP);
         }
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (Flow flow : flows) {
-            sb.append(flow.toString()).append("\n");
+        for (Map.Entry<String, Flow> entry : flows.entrySet()) {
+            sb.append("Conteúdo: ").append(entry.getKey()).append("\n").append(entry.getValue().toString()).append("\n");
         }
         return sb.toString();
     }

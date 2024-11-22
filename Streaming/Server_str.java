@@ -2,10 +2,10 @@ package Streaming;
 
 import java.io.*;
 import java.net.*;
+import java.util.Map;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.Timer;
 
 import oNode.Flows;
 import oNode.Flow;
@@ -67,7 +67,9 @@ public class Server_str extends JFrame {
                             // Está a fazer stream
                             isStreaming = true;
                             // Processamento dos fluxos
-                            for (Flow f : flows.flows) {
+                            // TODO: Implementar vários vídeos
+                            for (Map.Entry<String, Flow> entry : flows.flows.entrySet()) {
+                                Flow f = entry.getValue();
                                 for (String s : f.targets) {
                                     InetAddress ClientIP = InetAddress.getByName(s);
                                     new ClientHandler(ClientIP).start();

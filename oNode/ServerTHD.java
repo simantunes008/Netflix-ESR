@@ -73,19 +73,21 @@ public class ServerTHD implements Runnable {
 
                 printInfo();
             } else if (message.equals("FLOW")) {
+                String content = in.readUTF();
                 String targetServer = in.readUTF();
 
                 if (targetServer.equals(this.socket.getLocalAddress().getHostAddress())) {
-                    flows.addFlowServer(this.socket.getInetAddress().getHostAddress());
+                    flows.addFlow(content, "", this.socket.getInetAddress().getHostAddress(), "");
                 } else {
                     String nextIP = routs.routs.get(targetServer).previousIP;
 
-                    this.flows.addFlow(targetServer, this.socket.getInetAddress().getHostAddress(), nextIP);
+                    this.flows.addFlow(content, targetServer, this.socket.getInetAddress().getHostAddress(), nextIP);
 
                     Socket socket = new Socket(nextIP, 8090);
                     DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
                     out.writeUTF("FLOW");
+                    out.writeUTF(content);
                     out.writeUTF(targetServer);
 
                     socket.close();
@@ -93,23 +95,22 @@ public class ServerTHD implements Runnable {
 
                 printInfo();
             } else if (message.equals("END")) {
+                String content = in.readUTF();
                 String targetServer = in.readUTF();
 
-                for (Flow f : this.flows.flows) {
-                    if (f.source.equals(targetServer)) {
-                        f.targets.remove(this.socket.getInetAddress().getHostAddress());
-                        if (f.targets.isEmpty()) {
-                            String nextIP = routs.routs.get(targetServer).previousIP;
+                Flow f = this.flows.flows.get(content);
+                f.targets.remove(this.socket.getInetAddress().getHostAddress());
+                if (f.targets.isEmpty() && !targetServer.equals(this.socket.getLocalAddress().getHostAddress())) {
+                    String nextIP = routs.routs.get(targetServer).previousIP;
 
-                            Socket socket = new Socket(nextIP, 8090);
-                            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+                    Socket socket = new Socket(nextIP, 8090);
+                    DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
-                            out.writeUTF("END");
-                            out.writeUTF(targetServer);
+                    out.writeUTF("END");
+                    out.writeUTF(content);
+                    out.writeUTF(targetServer);
 
-                            socket.close();
-                        }
-                    }
+                    socket.close();
                 }
             }
 

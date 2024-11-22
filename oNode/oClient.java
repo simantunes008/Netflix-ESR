@@ -66,7 +66,8 @@ public class oClient {
                 }
             }
 
-            byte[] pingMessage = ("FLOW," + args[0]).getBytes();
+            // TODO: O vídeo não é para ser hardcoded
+            byte[] pingMessage = ("FLOW," + args[0] + ",movie.Mjpeg").getBytes();
             DatagramPacket pingPacket = new DatagramPacket(pingMessage, pingMessage.length, InetAddress.getByName(bestNode), 8070);
             socket.send(pingPacket);
 

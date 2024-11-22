@@ -42,33 +42,33 @@ public class popWorker implements Runnable {
                 } else if (msg[0].equals("FLOW")) {
                     String nextIP = routs.routs.get(msg[1]).previousIP;
 
-                    this.flows.addFlow(msg[1], clientAddress.getHostAddress(), nextIP);
+                    this.flows.addFlow(msg[2], msg[1], clientAddress.getHostAddress(), nextIP);
 
                     Socket socket1 = new Socket(nextIP, 8090);
                     DataOutputStream out = new DataOutputStream(socket1.getOutputStream());
 
                     out.writeUTF("FLOW");
+                    out.writeUTF(msg[2]);
                     out.writeUTF(msg[1]);
 
                     socket1.close();
                 } else if (msg[0].equals("END")) {
+                    String content = msg[2];
                     String targetServer = msg[1];
 
-                    for (Flow f : this.flows.flows) {
-                        if (f.source.equals(targetServer)) {
-                            f.targets.remove(clientAddress.getHostAddress());
-                            if (f.targets.isEmpty()) {
-                                String nextIP = routs.routs.get(targetServer).previousIP;
+                    Flow f = this.flows.flows.get(content);
+                    f.targets.remove(clientAddress.getHostAddress());
+                    if (f.targets.isEmpty()) {
+                        String nextIP = routs.routs.get(targetServer).previousIP;
 
-                                Socket socket1 = new Socket(nextIP, 8090);
-                                DataOutputStream out = new DataOutputStream(socket1.getOutputStream());
+                        Socket socket1 = new Socket(nextIP, 8090);
+                        DataOutputStream out = new DataOutputStream(socket1.getOutputStream());
 
-                                out.writeUTF("END");
-                                out.writeUTF(targetServer);
+                        out.writeUTF("END");
+                        out.writeUTF(content);
+                        out.writeUTF(targetServer);
 
-                                socket1.close();
-                            }
-                        }
+                        socket1.close();
                     }
                 }
             }

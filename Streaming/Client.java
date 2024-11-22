@@ -143,7 +143,7 @@ public class Client {
 
     private void sendEndMessage() {
         try {
-            byte[] endMessage = ("END," + this.server_ip).getBytes();
+            byte[] endMessage = ("END," + this.server_ip + ",movie.Mjpeg").getBytes();
             DatagramPacket endPacket = new DatagramPacket(endMessage, endMessage.length, InetAddress.getByName(this.pop), 8070);
             this.socket.send(endPacket);
             System.out.println("Mensagem 'END' enviada para " + this.pop);

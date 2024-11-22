@@ -14,6 +14,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.Map;
 
 public class Forwarder {
     private Flows flows;
@@ -71,8 +72,9 @@ public class Forwarder {
                         Socket_receiver.receive(receivePacket);
                         System.out.println("Pacote recebido: SeqNum # " + imagenb + " de " + receivePacket.getAddress() + ":" + receivePacket.getPort());
 
-                        for (Flow f : flows.flows){
-                            for (String s : f.targets){
+                        for (Map.Entry<String, Flow> entry : flows.flows.entrySet()) {
+                            Flow f = entry.getValue();
+                            for (String s : f.targets) {
                                 InetAddress ip = InetAddress.getByName(s);
 
                                 Thread t = new Thread(() -> {
