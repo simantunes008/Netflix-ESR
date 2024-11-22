@@ -5,9 +5,7 @@
 package oNode;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class Flows {
     public List<Flow> flows;
@@ -27,7 +25,7 @@ public class Flows {
 
     public void addFlow(String source, String previousIP, String nextIP) {
         if (!exists(source)) {
-            Set<String> targets = new HashSet<>();
+            List<String> targets = new ArrayList<>();
             targets.add(previousIP);
             this.flows.add(new Flow(source, nextIP, targets));
         } else {
@@ -41,7 +39,7 @@ public class Flows {
 
     public void addFlowServer(String IP) {
         if (this.flows.isEmpty()){
-            Set<String> targets = new HashSet<>();
+            List<String> targets = new ArrayList<>();
             targets.add(IP);
             this.flows.add(new Flow("", "", targets));
         } else {
