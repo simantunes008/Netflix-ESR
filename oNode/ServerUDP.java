@@ -49,9 +49,9 @@ public class ServerUDP implements Runnable {
                     packet = new DatagramPacket(response, response.length, clientAddress, clientPort);
                     socket.send(packet);
 
-                } else if (message.equals("")) {
-
                 }
+
+                socket.close();
             }
 
         } catch (IOException e) {

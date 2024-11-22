@@ -1,3 +1,7 @@
+/**
+ * Classe para representar o Conjunto de fluxos presentes num node
+ * */
+
 package oNode;
 
 import java.util.ArrayList;

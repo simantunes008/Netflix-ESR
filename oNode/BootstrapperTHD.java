@@ -1,3 +1,7 @@
+/**
+ * Thread para responder aos pedidos dos nodes
+ * */
+
 package oNode;
 
 import java.io.DataInputStream;

@@ -51,6 +51,7 @@ public class Forwarder {
 
         try{
             Socket_receiver = new DatagramSocket(RTP_port);
+            Socket_sender = new DatagramSocket();
         } catch (SocketException e) {
             throw new RuntimeException(e);
         }
@@ -74,22 +75,23 @@ public class Forwarder {
                             for (String s : f.targets){
                                 InetAddress ip = InetAddress.getByName(s);
 
-                                Thread t = new Thread(){
-                                    @Override
-                                    public void run() {
-                                        receivePacket.setAddress(ip);
-                                        receivePacket.setPort(RTP_port);
+                                Thread t = new Thread(() -> {
+                                    DatagramPacket packetCopy = new DatagramPacket(receiveBuf, receiveBuf.length);
+
+                                    synchronized(Socket_sender) {
+                                        packetCopy.setAddress(ip);
+                                        packetCopy.setPort(RTP_port);
                                         System.out.println("Encaminhando pacote para " + ip + ":" + RTP_port);
 
                                         try {
-                                            Socket_sender = new DatagramSocket();
-                                            Socket_sender.send(receivePacket);
+                                            Socket_sender.send(packetCopy);
                                             System.out.println("Pacote encaminhado para " + ip);
                                         } catch (IOException e) {
                                             throw new RuntimeException(e);
                                         }
                                     }
-                                };t.start();
+                                });
+                                t.start();
                             }
                         }
                     } catch (IOException e) {

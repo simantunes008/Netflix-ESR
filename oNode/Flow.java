@@ -1,3 +1,7 @@
+/**
+ * Classe para representar um fluxo de streaming
+ * */
+
 package oNode;
 
 import java.util.Set;

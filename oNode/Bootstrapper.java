@@ -1,7 +1,7 @@
 /**
  * Servidor responsável pelo papel de Bootstrapper
  * Cada Node liga-se a ele para receber a sua lista de Nodes vizinhos
- * Essa lista é conseguida por um ficheiro de configuração
+ * Essa lista é conseguida a partir de um ficheiro de configuração
  * */
 
 package oNode;
