@@ -50,8 +50,6 @@ public class ServerUDP implements Runnable {
                     socket.send(packet);
 
                 }
-
-                socket.close();
             }
 
         } catch (IOException e) {
