@@ -6,7 +6,7 @@ package Streaming;
 public class RTPpacket{
 
     //size of the RTP header:
-    static int HEADER_SIZE = 12;
+    static int HEADER_SIZE = 16;
 
     //Fields that compose the RTP header
     public int Version;
@@ -18,6 +18,7 @@ public class RTPpacket{
     public int SequenceNumber;
     public int TimeStamp;
     public int Ssrc;
+    public int VideoID;
 
     //Bitstream of the RTP header
     public byte[] header;
@@ -32,7 +33,7 @@ public class RTPpacket{
     //--------------------------
     //Constructor of an RTPpacket.java object from header fields and payload bitstream
     //--------------------------
-    public RTPpacket(int PType, int Framenb, int Time, byte[] data, int data_length){
+    public RTPpacket(int PType, int Framenb, int Time, int VidID, byte[] data, int data_length){
         //fill by default header fields:
         Version = 2;
         Padding = 0;
@@ -45,6 +46,7 @@ public class RTPpacket{
         SequenceNumber = Framenb;
         TimeStamp = Time;
         PayloadType = PType;
+        VideoID = VidID;
 
         //build the header bistream:
         //--------------------------
@@ -66,6 +68,10 @@ public class RTPpacket{
         header[9] = (byte)(Ssrc >> 16);
         header[10] = (byte)(Ssrc >> 8);
         header[11] = (byte)(Ssrc & 0xFF);
+        header[12] = (byte) (VideoID >> 24);
+        header[13] = (byte) (VideoID >> 16);
+        header[14] = (byte) (VideoID >> 8);
+        header[15] = (byte) (VideoID & 0xFF);
 
         //fill the payload bitstream:
         //--------------------------
@@ -112,6 +118,7 @@ public class RTPpacket{
             PayloadType = header[1] & 127;
             SequenceNumber = unsigned_int(header[3]) + 256*unsigned_int(header[2]);
             TimeStamp = unsigned_int(header[7]) + 256*unsigned_int(header[6]) + 65536*unsigned_int(header[5]) + 16777216*unsigned_int(header[4]);
+            VideoID = unsigned_int(header[15]) + 256 * unsigned_int(header[14]) + 65536 * unsigned_int(header[13]) + 16777216 * unsigned_int(header[12]);
         }
     }
 
@@ -164,6 +171,14 @@ public class RTPpacket{
     }
 
     //--------------------------
+    //getvideoid
+    //--------------------------
+
+    public int getVideoID() {
+        return VideoID;
+    }
+
+    //--------------------------
     //getsequencenumber
     //--------------------------
     public int getsequencenumber() {
@@ -191,7 +206,8 @@ public class RTPpacket{
                 + ", Marker: " + Marker
                 + ", PayloadType: " + PayloadType
                 + ", SequenceNumber: " + SequenceNumber
-                + ", TimeStamp: " + TimeStamp);
+                + ", TimeStamp: " + TimeStamp
+                + ", VideoID: " + VideoID);
     }
 
     //return the unsigned value of 8-bit integer nb

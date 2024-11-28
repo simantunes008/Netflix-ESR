@@ -68,7 +68,7 @@ public class Server_str extends JFrame {
                             isStreaming = true;
                             // Processamento dos fluxos
                             // TODO: Implementar vários vídeos
-                            for (Map.Entry<String, Flow> entry : flows.flows.entrySet()) {
+                            for (Map.Entry<Integer, Flow> entry : flows.flows.entrySet()) {
                                 Flow f = entry.getValue();
                                 for (String s : f.targets) {
                                     InetAddress ClientIP = InetAddress.getByName(s);
@@ -145,7 +145,7 @@ public class Server_str extends JFrame {
                     // Primeiro frame + seu tamanho
                     int image_length = video.getnextframe(sBuf);
 
-                    RTPpacket rtp_packet = new RTPpacket(MJPEG_TYPE, imagenb, imagenb * FRAME_PERIOD, sBuf, image_length);
+                    RTPpacket rtp_packet = new RTPpacket(MJPEG_TYPE, imagenb, imagenb * FRAME_PERIOD, 1, sBuf, image_length);
                     int packet_length = rtp_packet.getlength();
 
                     // Get Bitstream do pacote e armazena em um array de bytes

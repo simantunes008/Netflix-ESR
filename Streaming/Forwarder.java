@@ -72,8 +72,11 @@ public class Forwarder {
                         Socket_receiver.receive(receivePacket);
                         System.out.println("Pacote recebido: SeqNum # " + imagenb + " de " + receivePacket.getAddress() + ":" + receivePacket.getPort());
 
-                        for (Map.Entry<String, Flow> entry : flows.flows.entrySet()) {
-                            Flow f = entry.getValue();
+                        int id = ((receiveBuf[12] & 0xFF) << 24) | ((receiveBuf[13] & 0xFF) << 16) |
+                                ((receiveBuf[14] & 0xFF) << 8) | (receiveBuf[15] & 0xFF);
+
+                        Flow f = flows.flows.get(id);
+                            
                             for (String s : f.targets) {
                                 InetAddress ip = InetAddress.getByName(s);
 
@@ -95,7 +98,7 @@ public class Forwarder {
                                 });
                                 t.start();
                             }
-                        }
+                        
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

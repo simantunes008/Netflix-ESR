@@ -73,21 +73,21 @@ public class ServerTHD implements Runnable {
 
                 printInfo();
             } else if (message.equals("FLOW")) {
-                String content = in.readUTF();
+                Integer id = in.readInt();
                 String targetServer = in.readUTF();
 
                 if (targetServer.equals(this.socket.getLocalAddress().getHostAddress())) {
-                    flows.addFlow(content, "", this.socket.getInetAddress().getHostAddress(), "");
+                    flows.addFlow(id, "", this.socket.getInetAddress().getHostAddress(), "");
                 } else {
                     String nextIP = routs.routs.get(targetServer).previousIP;
 
-                    this.flows.addFlow(content, targetServer, this.socket.getInetAddress().getHostAddress(), nextIP);
+                    this.flows.addFlow(id, targetServer, this.socket.getInetAddress().getHostAddress(), nextIP);
 
                     Socket socket = new Socket(nextIP, 8090);
                     DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
                     out.writeUTF("FLOW");
-                    out.writeUTF(content);
+                    out.writeInt(id);
                     out.writeUTF(targetServer);
 
                     socket.close();
@@ -95,10 +95,10 @@ public class ServerTHD implements Runnable {
 
                 printInfo();
             } else if (message.equals("END")) {
-                String content = in.readUTF();
+                Integer id = in.readInt();
                 String targetServer = in.readUTF();
 
-                Flow f = this.flows.flows.get(content);
+                Flow f = this.flows.flows.get(id);
                 f.targets.remove(this.socket.getInetAddress().getHostAddress());
                 if (f.targets.isEmpty() && !targetServer.equals(this.socket.getLocalAddress().getHostAddress())) {
                     String nextIP = routs.routs.get(targetServer).previousIP;
@@ -107,7 +107,7 @@ public class ServerTHD implements Runnable {
                     DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
                     out.writeUTF("END");
-                    out.writeUTF(content);
+                    out.writeInt(id);
                     out.writeUTF(targetServer);
 
                     socket.close();

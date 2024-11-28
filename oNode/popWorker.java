@@ -40,23 +40,26 @@ public class popWorker implements Runnable {
                     packet = new DatagramPacket(response, response.length, clientAddress, clientPort);
                     socket.send(packet);
                 } else if (msg[0].equals("FLOW")) {
-                    String nextIP = routs.routs.get(msg[1]).previousIP;
+                    Integer id = Integer.valueOf(msg[2]);
+                    String targetServer = msg[1];
 
-                    this.flows.addFlow(msg[2], msg[1], clientAddress.getHostAddress(), nextIP);
+                    String nextIP = routs.routs.get(targetServer).previousIP;
+
+                    this.flows.addFlow(id, targetServer, clientAddress.getHostAddress(), nextIP);
 
                     Socket socket1 = new Socket(nextIP, 8090);
                     DataOutputStream out = new DataOutputStream(socket1.getOutputStream());
 
                     out.writeUTF("FLOW");
-                    out.writeUTF(msg[2]);
-                    out.writeUTF(msg[1]);
+                    out.writeInt(id);
+                    out.writeUTF(targetServer);
 
                     socket1.close();
                 } else if (msg[0].equals("END")) {
-                    String content = msg[2];
+                    Integer id = Integer.valueOf(msg[2]);
                     String targetServer = msg[1];
 
-                    Flow f = this.flows.flows.get(content);
+                    Flow f = this.flows.flows.get(id);
                     f.targets.remove(clientAddress.getHostAddress());
                     if (f.targets.isEmpty()) {
                         String nextIP = routs.routs.get(targetServer).previousIP;
@@ -65,7 +68,7 @@ public class popWorker implements Runnable {
                         DataOutputStream out = new DataOutputStream(socket1.getOutputStream());
 
                         out.writeUTF("END");
-                        out.writeUTF(content);
+                        out.writeInt(id);
                         out.writeUTF(targetServer);
 
                         socket1.close();
