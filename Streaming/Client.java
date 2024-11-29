@@ -44,8 +44,9 @@ public class Client {
     String server_ip;
     String pop;
     DatagramSocket socket;
+    String videoID;
 
-    public Client(String servidor, String pop, DatagramSocket socket) {
+    public Client(String servidor, String pop, DatagramSocket socket, String videoID) {
         this.f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent var1) {
                 System.exit(0);
@@ -75,6 +76,7 @@ public class Client {
         this.server_ip = servidor;
         this.pop = pop;
         this.socket = socket;
+        this.videoID = videoID;
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             sendEndMessage();
@@ -85,12 +87,11 @@ public class Client {
             // Envia mensagem inicial para o servidor
             DatagramSocket setupSocket = new DatagramSocket();
             InetAddress serverAddress = InetAddress.getByName(server_ip);
-            String startMessage = "START";
-            DatagramPacket startPacket = new DatagramPacket(startMessage.getBytes(), startMessage.length(), serverAddress, RTP_RCV_PORT);
+            DatagramPacket startPacket = new DatagramPacket(videoID.getBytes(), videoID.length(), serverAddress, RTP_RCV_PORT);
             setupSocket.send(startPacket);
             setupSocket.close();
 
-            System.out.println("Mensagem 'START' enviada ao servidor ");
+            System.out.println("Mensagem enviada ao servidor ");
 
 
             this.RTPsocket = new DatagramSocket(RTP_RCV_PORT);
@@ -143,7 +144,7 @@ public class Client {
 
     private void sendEndMessage() {
         try {
-            byte[] endMessage = ("END," + this.server_ip + ",1").getBytes();
+            byte[] endMessage = ("END," + this.server_ip + "," + this.videoID).getBytes();
             DatagramPacket endPacket = new DatagramPacket(endMessage, endMessage.length, InetAddress.getByName(this.pop), 8070);
             this.socket.send(endPacket);
             System.out.println("Mensagem 'END' enviada para " + this.pop);

@@ -2,6 +2,7 @@ package Streaming;
 
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
 import java.util.Map;
 import java.awt.*;
 import java.awt.event.*;
@@ -21,7 +22,8 @@ public class Server_str extends JFrame {
     DatagramSocket RTPsocket; //socket to be used to send and receive UDP packet
     int RTP_dest_port = 25000; //destination port for RTP packets
 
-    static String VideoFileName = "Streaming/movie.Mjpeg"; //video file to request to the server
+    private Map<Integer, String> VideoFiles = new HashMap<>();
+    private Map<Integer, Boolean> VideoStreams = new HashMap<>();
 
     VideoStream video; //VideoStream object used to access video frames
     static int MJPEG_TYPE = 26; //RTP payload type for MJPEG video
@@ -30,14 +32,16 @@ public class Server_str extends JFrame {
 
     private static Flows flows;
 
-    boolean isStreaming = false;
-
     //Construtor a ser usado
     public Server_str(Flows flows) {
         super("Servidor");
 
         System.out.println("Sou o servidor de Streaming e inicializei. \n");
 
+        VideoFiles.put(1,"Streaming/movie.Mjpeg");
+        VideoStreams.put(1,false);
+        VideoFiles.put(2,"Streaming/movie_copy.Mjpeg");
+        VideoStreams.put(2,false);
         this.flows = flows;
 
         label = new JLabel("Send frame #        ", JLabel.CENTER);
@@ -63,18 +67,19 @@ public class Server_str extends JFrame {
                         String message = new String(request.getData(), 0, request.getLength());
                         System.out.println("Servidor recebeu: " + message);
 
-                        if (message.equals("START") && !isStreaming) {
-                            // Está a fazer stream
-                            isStreaming = true;
-                            // Processamento dos fluxos
-                            // TODO: Implementar vários vídeos
-                            for (Map.Entry<Integer, Flow> entry : flows.flows.entrySet()) {
-                                Flow f = entry.getValue();
-                                for (String s : f.targets) {
-                                    InetAddress ClientIP = InetAddress.getByName(s);
-                                    new ClientHandler(ClientIP).start();
-                                }
+                        int requestedFlow = Integer.parseInt(message);
+                        if (VideoFiles.containsKey(requestedFlow) && !VideoStreams.get(requestedFlow)) {
+                            // Recupera o vídeo solicitado
+                            String requestedVideo = VideoFiles.get(requestedFlow);
+                            VideoStreams.put(requestedFlow, true);
+
+                            Flow f = flows.flows.get(message);
+                            for (String s : f.targets) {
+                                InetAddress ClientIP = InetAddress.getByName(s);
+                                new ClientHandler(ClientIP, requestedVideo, requestedFlow).start();
                             }
+                        } else {
+                            System.out.println("Vídeo não encontrado para o fluxo: " + requestedFlow);
                         }
                     } catch (Exception e) {
                         System.out.println("Erro ao escutar conexões: " + e.getMessage());
@@ -96,20 +101,7 @@ public class Server_str extends JFrame {
 
     //main
     public static void main(String argv[]) throws Exception {
-        if (argv.length >= 1 ) {
-            VideoFileName = argv[0];
-        } else  {
-            VideoFileName = "movie.Mjpeg";
-        }
-
-        File f = new File(VideoFileName);
-        if (f.exists()) {
-            Server_str s = new Server_str(flows);
-            //show GUI: (opcional!)
-            //s.pack();
-            //s.setVisible(true);
-        } else
-            System.out.println("\nINFO EXTRA: Não existe o seguinte vídeo " + VideoFileName);
+        Server_str s = new Server_str(flows);
     }
 
 
@@ -120,10 +112,12 @@ public class Server_str extends JFrame {
         private VideoStream video;
         private int imagenb = 0;
         private byte[] sBuf = new byte[15000];
+        private int VidID;
 
-        public ClientHandler(InetAddress clientIP) {
+        public ClientHandler(InetAddress clientIP, String VideoFileName, int VideoID) {
             this.clientIP = clientIP;
             this.server = Server_str.this;
+            this.VidID = VideoID;
             try {
                 this.video = new VideoStream(VideoFileName);
                 this.timer = new Timer(FRAME_PERIOD, this);
@@ -145,7 +139,7 @@ public class Server_str extends JFrame {
                     // Primeiro frame + seu tamanho
                     int image_length = video.getnextframe(sBuf);
 
-                    RTPpacket rtp_packet = new RTPpacket(MJPEG_TYPE, imagenb, imagenb * FRAME_PERIOD, 1, sBuf, image_length);
+                    RTPpacket rtp_packet = new RTPpacket(MJPEG_TYPE, imagenb, imagenb * FRAME_PERIOD, VidID, sBuf, image_length);
                     int packet_length = rtp_packet.getlength();
 
                     // Get Bitstream do pacote e armazena em um array de bytes
@@ -165,7 +159,7 @@ public class Server_str extends JFrame {
                     timer.stop();
                 }
             } else {
-                server.isStreaming = false;
+                VideoStreams.put(VidID, false);
                 timer.stop(); // Para o temporizador se o vídeo acabou
             }
         }
@@ -173,7 +167,7 @@ public class Server_str extends JFrame {
         // Inicia o temporizador quando a thread é iniciada
         @Override
         public void run() {
-            System.out.println("Iniciando envio de vídeo " + VideoFileName + " para " + clientIP);
+            System.out.println("Iniciando envio de vídeo para " + clientIP);
             timer.start();
         }
     }

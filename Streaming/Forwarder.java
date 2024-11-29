@@ -14,10 +14,14 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Forwarder {
     private Flows flows;
+    private ExecutorService executorService;
 
     // ### GUI ###
     JLabel label;
@@ -25,7 +29,6 @@ public class Forwarder {
     DatagramPacket receivePacket;
     DatagramSocket Socket_receiver;
     DatagramPacket sendPacket;
-    DatagramSocket Socket_sender;
 
     int RTP_port = 25000;
 
@@ -40,10 +43,13 @@ public class Forwarder {
     Timer sendTimer;
     byte[] sendBuf;
 
+    private Map<Integer, DatagramSocket> socketMap = new HashMap<>();
+    
 
     public Forwarder(Flows flows){
 
         this.flows = flows;
+        this.executorService = Executors.newFixedThreadPool(10);
         receiveTimer = new Timer(20, new clientTimerListener());
         receiveTimer.setInitialDelay(0);
         this.receiveTimer.setCoalesce(true);
@@ -52,7 +58,6 @@ public class Forwarder {
 
         try{
             Socket_receiver = new DatagramSocket(RTP_port);
-            Socket_sender = new DatagramSocket();
         } catch (SocketException e) {
             throw new RuntimeException(e);
         }
@@ -60,6 +65,17 @@ public class Forwarder {
        receiveTimer.start();
     }
 
+    private DatagramSocket getSocket(int flowId) throws SocketException {
+        synchronized (socketMap) {
+            return socketMap.computeIfAbsent(flowId, id -> {
+                try {
+                    return new DatagramSocket();
+                } catch (SocketException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+    }
 
     class clientTimerListener implements ActionListener {
         clientTimerListener() {
@@ -70,34 +86,28 @@ public class Forwarder {
                 if (imagenb < VIDEO_LENGTH){
                     try{
                         Socket_receiver.receive(receivePacket);
-                        System.out.println("Pacote recebido: SeqNum # " + imagenb + " de " + receivePacket.getAddress() + ":" + receivePacket.getPort());
 
                         int id = ((receiveBuf[12] & 0xFF) << 24) | ((receiveBuf[13] & 0xFF) << 16) |
                                 ((receiveBuf[14] & 0xFF) << 8) | (receiveBuf[15] & 0xFF);
 
-                        Flow f = flows.flows.get(id);
+                        Flow f = flows.flows.get(String.valueOf(id));
                             
-                            for (String s : f.targets) {
-                                InetAddress ip = InetAddress.getByName(s);
+                        for (String s : f.targets) {
+                            InetAddress ip = InetAddress.getByName(s);
 
-                                Thread t = new Thread(() -> {
+                            executorService.submit(() -> {
+                                try {
+                                    DatagramSocket Socket_sender = getSocket(id);
                                     DatagramPacket packetCopy = new DatagramPacket(receiveBuf, receiveBuf.length);
-
-                                    synchronized(Socket_sender) {
-                                        packetCopy.setAddress(ip);
-                                        packetCopy.setPort(RTP_port);
-                                        System.out.println("Encaminhando pacote para " + ip + ":" + RTP_port);
-
-                                        try {
-                                            Socket_sender.send(packetCopy);
-                                            System.out.println("Pacote encaminhado para " + ip);
-                                        } catch (IOException e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                    }
-                                });
-                                t.start();
-                            }
+                                    
+                                    packetCopy.setAddress(ip);
+                                    packetCopy.setPort(RTP_port);
+                                    Socket_sender.send(packetCopy);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                        }
                         
                     } catch (IOException e) {
                         throw new RuntimeException(e);

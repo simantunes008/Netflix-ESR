@@ -40,26 +40,26 @@ public class popWorker implements Runnable {
                     packet = new DatagramPacket(response, response.length, clientAddress, clientPort);
                     socket.send(packet);
                 } else if (msg[0].equals("FLOW")) {
-                    Integer id = Integer.valueOf(msg[2]);
+                    String videoId = msg[2];
                     String targetServer = msg[1];
 
                     String nextIP = routs.routs.get(targetServer).previousIP;
 
-                    this.flows.addFlow(id, targetServer, clientAddress.getHostAddress(), nextIP);
+                    this.flows.addFlow(videoId, targetServer, clientAddress.getHostAddress(), nextIP);
 
                     Socket socket1 = new Socket(nextIP, 8090);
                     DataOutputStream out = new DataOutputStream(socket1.getOutputStream());
 
                     out.writeUTF("FLOW");
-                    out.writeInt(id);
+                    out.writeUTF(videoId);
                     out.writeUTF(targetServer);
 
                     socket1.close();
                 } else if (msg[0].equals("END")) {
-                    Integer id = Integer.valueOf(msg[2]);
+                    String videoId = msg[2];
                     String targetServer = msg[1];
 
-                    Flow f = this.flows.flows.get(id);
+                    Flow f = this.flows.flows.get(videoId);
                     f.targets.remove(clientAddress.getHostAddress());
                     if (f.targets.isEmpty()) {
                         String nextIP = routs.routs.get(targetServer).previousIP;
@@ -68,7 +68,7 @@ public class popWorker implements Runnable {
                         DataOutputStream out = new DataOutputStream(socket1.getOutputStream());
 
                         out.writeUTF("END");
-                        out.writeInt(id);
+                        out.writeUTF(videoId);
                         out.writeUTF(targetServer);
 
                         socket1.close();

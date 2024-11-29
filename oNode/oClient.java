@@ -10,7 +10,7 @@ public class oClient {
     private static final int PING_ATTEMPTS = 3;
 
     public static void main(String[] args) throws IOException {
-        if (args.length == 1) {
+        if (args.length == 2) {
             DatagramSocket socket = new DatagramSocket();
             socket.setSoTimeout(TIMEOUT);
 
@@ -67,17 +67,17 @@ public class oClient {
             }
 
             // TODO: O vídeo não é para ser hardcoded
-            byte[] pingMessage = ("FLOW," + args[0] + ",1").getBytes();
+            byte[] pingMessage = ("FLOW," + args[0] + "," + args[1]).getBytes();
             DatagramPacket pingPacket = new DatagramPacket(pingMessage, pingMessage.length, InetAddress.getByName(bestNode), 8070);
             socket.send(pingPacket);
 
             // Inicia o cliente de streaming
             System.out.println("#NEXT# : CLIENTE DE STREAMING");
-            new Streaming.Client(args[0], bestNode, socket);
+            new Streaming.Client(args[0], bestNode, socket, args[1]);
 
         } else {
             System.out.println("Usage:\n" +
-                    " Client                   java oNode.oClient [SERVER_IP]");
+                    " Client                   java oNode.oClient [SERVER_IP] [VIDEO_ID]");
         }
     }
 }
