@@ -37,8 +37,8 @@ java oNode.oNode -pop [BOOTSTRAPPER_IP]
 ```bash
 java oNode.oNode [BOOTSTRAPPER_IP]
 ```
-- Executar o Cliente com o servidor ao qual nos pretendemos ligar
+- Executar o Cliente com o servidor e vídeo aos quais nos pretendemos ligar e ver 
 ```bash
 export DISPLAY=:0.0
-java oNode.oClient [SERVER_IP]
+java oNode.oClient [SERVER_IP] [VIDEO_ID]
 ```
